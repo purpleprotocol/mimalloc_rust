@@ -1,9 +1,12 @@
+# Mimalloc Rust
+
 A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
 
 ## Usage
 ```rust
 use mimalloc::MiMalloc;
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 ```
