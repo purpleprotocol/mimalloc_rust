@@ -1,4 +1,5 @@
 # Mimalloc Rust
+[![Build Status](https://travis-ci.org/purpleprotocol/mimalloc_rust.svg?branch=master)](https://travis-ci.org/purpleprotocol/mimalloc_rust) [![Latest Version]][crates.io] [![Documentation]][docs.rs]
 
 A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
@@ -20,3 +21,8 @@ In `Cargo.toml`:
 [dependencies]
 mimalloc = { version = "*", features = ["no_secure"] }
 ```
+
+[crates.io]: https://crates.io/crates/mimalloc
+[Latest Version]: https://img.shields.io/crates/v/mimalloc.svg
+[Documentation]: https://docs.rs/mimalloc/badge.svg
+[docs.rs]: https://docs.rs/mimalloc

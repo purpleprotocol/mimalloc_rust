@@ -1,0 +1,28 @@
+dist: trusty
+sudo: require
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-6
+      - g++-6
+      - cmake
+
+language: rust
+
+cache: cargo
+
+rust:
+  - stable
+  - nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
+
+script:
+  - cargo build --release
+  - cargo build --release --features no_secure
