@@ -5,6 +5,7 @@ authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+libc = "0.2"
 
 [build-dependencies]
 cmake = "0.1"
