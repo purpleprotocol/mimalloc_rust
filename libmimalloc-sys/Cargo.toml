@@ -3,6 +3,11 @@ name = "libmimalloc-sys"
 version = "0.1.0"
 authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
+repository = "https://github.com/purpleprotocol/mimalloc_rust/tree/master/libmimalloc-sys"
+keywords = ["allocator", "encrypted-heap", "performance"]
+categories = ["allocator"]
+description = "Sys crate wrapping the mimalloc allocator"
+license = "MIT"
 
 [dependencies]
 libc = "0.2"
