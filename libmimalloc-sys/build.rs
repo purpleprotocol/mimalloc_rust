@@ -2,7 +2,7 @@ use cmake::Config;
 
 #[cfg(feature = "no_secure")]
 fn main() {
-    let dst = Config::new("c_src/mimalloc")    
+    let mut dst = Config::new("c_src/mimalloc")    
         .build();
 
     dst.push("build");
@@ -27,6 +27,6 @@ fn main() {
     if cfg!(debug_assertions) {
         println!("cargo:rustc-link-lib=static=mimalloc-debug");
     } else {
-        println!("cargo:rustc-link-lib=static=mimalloc");
+        println!("cargo:rustc-link-lib=static=mimalloc-secure");
     }
 }
