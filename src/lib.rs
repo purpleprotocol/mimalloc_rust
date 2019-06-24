@@ -21,6 +21,8 @@
 //! mimalloc = { version = "*", features = ["no_secure"] }
 //! ```
 
+extern crate libmimalloc_sys as ffi;
+
 use std::alloc::{GlobalAlloc, Layout};
 use std::ptr::null_mut;
 use libc::c_void;
@@ -47,5 +49,3 @@ unsafe impl GlobalAlloc for MiMalloc {
         mi_free(ptr as *const c_void);
     }
 }
-
-mod ffi;

@@ -1,12 +1,14 @@
 [package]
-name = "mimalloc"
+name = "libmimalloc-sys"
 version = "0.1.0"
 authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 libc = "0.2"
-libmimalloc-sys = { path = "libmimalloc-sys" }
+
+[build-dependencies]
+cmake = "0.1"
 
 [features]
-no_secure = ["libmimalloc-sys/no_secure"]
+no_secure = []
