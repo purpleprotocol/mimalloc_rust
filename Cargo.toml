@@ -1,7 +1,10 @@
 [package]
 name = "mimalloc"
 version = "0.1.2"
-authors = ["Octavian Oncescu <octavonce@gmail.com>"]
+authors = [
+    "Octavian Oncescu <octavonce@gmail.com>",
+    "Vincent Rouillé <vincent@speedy37.fr>",
+]
 edition = "2018"
 repository = "https://github.com/purpleprotocol/mimalloc_rust"
 keywords = ["mimalloc", "allocator", "encrypted-heap", "performance"]
