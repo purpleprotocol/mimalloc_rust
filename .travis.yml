@@ -12,6 +12,8 @@ os:
   - linux
   - osx
 
+dist: xenial
+
 matrix:
   allow_failures:
     - rust: nightly
