@@ -1,28 +1,33 @@
-dist: trusty
-sudo: require
+language: rust
+
+sudo: required
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+os:
+  - windows
+  - linux
+  - osx
+
+matrix:
+  allow_failures:
+    - rust: nightly
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
-      - gcc-6
-      - g++-6
       - cmake
+      - gcc
 
 language: rust
 
 cache: cargo
 
-rust:
-  - stable
-  - nightly
-
-matrix:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
-
 script:
-  - cargo test --all
-  - cargo test --all --features no_secure
+  - cargo test --verbose --all
+  - cargo test --verbose --all --no-default-features
+  - cargo test --release --verbose --all
+  - cargo test --release --verbose --all --no-default-features
