@@ -31,9 +31,7 @@ fn main() {
     } else {
         if cfg!(debug_assertions) {
             ("./build", "mimalloc-debug")
-        } else if cfg!(feature = "secure") {
-            ("./build", "mimalloc")
-        } else {
+        } else  {
             ("./build", "mimalloc")
         }
     };
