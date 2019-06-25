@@ -1,6 +1,5 @@
 // Copyright 2019 Octavian Oncescu
 
-#![feature(no_std)]
 #![no_std]
 
 //! A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
@@ -15,7 +14,7 @@
 //! ```
 //! 
 //! ## Usage without secure mode
-//! By default this library builds mimalloc in safe-mode. This means that
+//! By default this library builds mimalloc in secure mode. This means that
 //! heap allocations are encrypted, but this results in a 3% increase in overhead.
 //! 
 //! To disable secure mode, in `Cargo.toml`:
