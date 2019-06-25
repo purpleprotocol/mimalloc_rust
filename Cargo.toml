@@ -4,11 +4,14 @@ version = "0.1.0"
 authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/purpleprotocol/mimalloc_rust"
-keywords = ["allocator", "encrypted-heap", "performance"]
-categories = ["allocator"]
+keywords = ["mimalloc", "allocator", "encrypted-heap", "performance"]
+categories = ["memory-management", "api-bindings"]
 description = "Performance and security oriented drop-in allocator"
 license = "MIT"
 readme = "README.md"
+
+[badges]
+travis-ci = { repository = "purpleprotocol/mimalloc_rust" }
 
 [dependencies]
 libc = "0.2"

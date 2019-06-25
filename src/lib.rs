@@ -4,7 +4,7 @@
 //! Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
 //! 
 //! ## Usage
-//! ```rust
+//! ```rust,ignore
 //! use mimalloc::MiMalloc;
 //!
 //! #[global_allocator]
@@ -16,7 +16,7 @@
 //! heap allocations are encrypted, but this results in a 3% increase in overhead.
 //! 
 //! In `Cargo.toml`:
-//! ```rust
+//! ```rust,ignore
 //! [dependencies]
 //! mimalloc = { version = "*", features = ["no_secure"] }
 //! ```
@@ -51,7 +51,7 @@ const MIN_ALIGN: usize = 16;
 /// Drop-in mimalloc global allocator.
 /// 
 /// ## Usage
-/// ```rust
+/// ```rust,ignore
 /// use mimalloc::MiMalloc;
 ///
 /// #[global_allocator]
@@ -96,5 +96,44 @@ unsafe impl GlobalAlloc for MiMalloc {
         };
         
         mi_realloc_aligned(ptr as *const c_void, new_size, align) as *mut u8
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_frees_allocated_memory() {
+        unsafe {
+            let layout = Layout::from_size_align(8, 8).unwrap();
+            let alloc = MiMalloc;
+
+            let ptr = alloc.alloc(layout.clone());
+            alloc.dealloc(ptr, layout);
+        }
+    }
+
+    #[test]
+    fn it_frees_zero_allocated_memory() {
+        unsafe {
+            let layout = Layout::from_size_align(8, 8).unwrap();
+            let alloc = MiMalloc;
+
+            let ptr = alloc.alloc_zeroed(layout.clone());
+            alloc.dealloc(ptr, layout);
+        }
+    }
+
+    #[test]
+    fn it_frees_reallocated_memory() {
+        unsafe {
+            let layout = Layout::from_size_align(8, 8).unwrap();
+            let alloc = MiMalloc;
+
+            let ptr = alloc.alloc(layout.clone());
+            let ptr = alloc.realloc(ptr, layout.clone(), 16);
+            alloc.dealloc(ptr, layout);
+        }
     }
 }
