@@ -16,10 +16,10 @@ static GLOBAL: MiMalloc = MiMalloc;
 By default this library builds mimalloc in safe-mode. This means that
 heap allocations are encrypted, but this results in a 3% increase in overhead.
 
-In `Cargo.toml`:
+To disable secure mode, in `Cargo.toml`:
 ```rust
 [dependencies]
-mimalloc = { version = "*", features = ["no_secure"] }
+mimalloc = { version = "*", default-features = false }
 ```
 
 [crates.io]: https://crates.io/crates/mimalloc

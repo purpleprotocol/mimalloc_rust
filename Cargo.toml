@@ -18,4 +18,5 @@ libc = "0.2"
 libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.0" }
 
 [features]
-no_secure = ["libmimalloc-sys/no_secure"]
+default = ["secure"]
+secure = ["libmimalloc-sys/secure"]

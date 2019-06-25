@@ -1,6 +1,6 @@
 use cmake::Config;
 
-#[cfg(feature = "no_secure")]
+#[cfg(not(feature = "secure"))]
 fn main() {
     let mut dst = Config::new("c_src/mimalloc")    
         .build();
@@ -15,7 +15,7 @@ fn main() {
     }
 }
 
-#[cfg(not(feature = "no_secure"))]
+#[cfg(feature = "secure")]
 fn main() {
     let mut dst = Config::new("c_src/mimalloc")
         .define("SECURE", "ON")    

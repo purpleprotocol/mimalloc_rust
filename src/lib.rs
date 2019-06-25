@@ -1,5 +1,8 @@
 // Copyright 2019 Octavian Oncescu
 
+#![feature(no_std)]
+#![no_std]
+
 //! A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 //! Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
 //! 
@@ -15,15 +18,15 @@
 //! By default this library builds mimalloc in safe-mode. This means that
 //! heap allocations are encrypted, but this results in a 3% increase in overhead.
 //! 
-//! In `Cargo.toml`:
+//! To disable secure mode, in `Cargo.toml`:
 //! ```rust,ignore
 //! [dependencies]
-//! mimalloc = { version = "*", features = ["no_secure"] }
+//! mimalloc = { version = "*", default-features = false }
 //! ```
 
 extern crate libmimalloc_sys as ffi;
 
-use std::alloc::{GlobalAlloc, Layout};
+use core::alloc::{GlobalAlloc, Layout};
 use libc::c_void;
 use ffi::*;
 
@@ -62,24 +65,20 @@ pub struct MiMalloc;
 unsafe impl GlobalAlloc for MiMalloc {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let align = if layout.align() > MIN_ALIGN {
-            layout.align()
+        if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
+            mi_malloc(layout.size()) as *mut u8
         } else {
-            MIN_ALIGN
-        };
-
-        mi_malloc_aligned(layout.size(), align) as *mut u8
+            mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
+        }
     }
 
     #[inline]
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        let align = if layout.align() > MIN_ALIGN {
-            layout.align()
+        if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
+            mi_zalloc(layout.size()) as *mut u8
         } else {
-            MIN_ALIGN
-        };
-        
-        mi_zalloc_aligned(layout.size(), align) as *mut u8
+            mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
+        }
     }
     
     #[inline]
@@ -89,13 +88,11 @@ unsafe impl GlobalAlloc for MiMalloc {
 
     #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        let align = if layout.align() > MIN_ALIGN {
-            layout.align()
+        if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
+            mi_realloc(ptr as *const c_void, new_size) as *mut u8
         } else {
-            MIN_ALIGN
-        };
-        
-        mi_realloc_aligned(ptr as *const c_void, new_size, align) as *mut u8
+            mi_realloc_aligned(ptr as *const c_void, new_size, layout.align()) as *mut u8
+        }
     }
 }
 
