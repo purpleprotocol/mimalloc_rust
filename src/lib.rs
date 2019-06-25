@@ -27,6 +27,7 @@
 extern crate libmimalloc_sys as ffi;
 
 use core::alloc::{GlobalAlloc, Layout};
+use core::ptr;
 use libc::c_void;
 use ffi::*;
 
@@ -68,6 +69,13 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_malloc(layout.size()) as *mut u8
         } else {
+            #[cfg(target_os = "macos")]
+            {
+                if layout.align() > (1 << 31) {
+                    return ptr::null_mut()
+                }
+            }
+
             mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
         }
     }
@@ -77,6 +85,13 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_zalloc(layout.size()) as *mut u8
         } else {
+            #[cfg(target_os = "macos")]
+            {
+                if layout.align() > (1 << 31) {
+                    return ptr::null_mut()
+                }
+            }
+
             mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
         }
     }
