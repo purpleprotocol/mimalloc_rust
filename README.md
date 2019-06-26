@@ -1,6 +1,6 @@
 # Mimalloc Rust
 
-[![Build Status](https://travis-ci.org/purpleprotocol/mimalloc_rust.svg?branch=master)](https://travis-ci.org/purpleprotocol/mimalloc_rust) [![AppVeyor](https://ci.appveyor.com/api/projects/status/sv2csbpe6p31y0t5?svg=true)](https://ci.appveyor.com/project/OctavianOncescu/mimalloc_rust) [![Latest Version]][crates.io] [![Documentation]][docs.rs]
+[![Build Status](https://travis-ci.org/purpleprotocol/mimalloc_rust.svg?branch=master)](https://travis-ci.org/purpleprotocol/mimalloc_rust) [![AppVeyor](https://ci.appveyor.com/api/projects/status/sv2csbpe6p31y0t5?svg=true)](https://ci.appveyor.com/project/OctavianOncescu/mimalloc-rust) [![Latest Version]][crates.io] [![Documentation]][docs.rs]
 
 A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
