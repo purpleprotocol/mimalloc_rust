@@ -1,10 +1,12 @@
 # Mimalloc Rust
+
 [![Build Status](https://travis-ci.org/purpleprotocol/mimalloc_rust.svg?branch=master)](https://travis-ci.org/purpleprotocol/mimalloc_rust) [![Latest Version]][crates.io] [![Documentation]][docs.rs]
 
 A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
 
 ## Usage
+
 ```rust
 use mimalloc::MiMalloc;
 
@@ -12,9 +14,17 @@ use mimalloc::MiMalloc;
 static GLOBAL: MiMalloc = MiMalloc;
 ```
 
+## Requirements
+
+[CMake](https://cmake.org/) and a __C__ compiler are required for building 
+[mimalloc](https://github.com/microsoft/mimalloc) with cargo.
+
 ## Usage without secure mode
-By default this library builds mimalloc in secure mode. This means that
-heap allocations are encrypted, but this results in a 3% increase in overhead.
+
+By default this library builds mimalloc in secure mode. This add guard pages, 
+randomized allocation, encrypted free lists, etc. The performance penalty should 
+only be around 3% according to [mimalloc](https://github.com/microsoft/mimalloc)
+own benchmarks.
 
 To disable secure mode, in `Cargo.toml`:
 ```rust

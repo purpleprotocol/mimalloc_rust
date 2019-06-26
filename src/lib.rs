@@ -4,7 +4,7 @@
 
 //! A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 //! Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
-//! 
+//!
 //! ## Usage
 //! ```rust,ignore
 //! use mimalloc::MiMalloc;
@@ -12,11 +12,11 @@
 //! #[global_allocator]
 //! static GLOBAL: MiMalloc = MiMalloc;
 //! ```
-//! 
+//!
 //! ## Usage without secure mode
 //! By default this library builds mimalloc in secure mode. This means that
 //! heap allocations are encrypted, but this results in a 3% increase in overhead.
-//! 
+//!
 //! To disable secure mode, in `Cargo.toml`:
 //! ```rust,ignore
 //! [dependencies]
@@ -26,9 +26,8 @@
 extern crate libmimalloc_sys as ffi;
 
 use core::alloc::{GlobalAlloc, Layout};
-use core::ptr;
-use libc::c_void;
 use ffi::*;
+use libc::c_void;
 
 // Copied from https://github.com/rust-lang/rust/blob/master/src/libstd/sys_common/alloc.rs
 #[cfg(all(any(
@@ -52,7 +51,7 @@ const MIN_ALIGN: usize = 8;
 const MIN_ALIGN: usize = 16;
 
 /// Drop-in mimalloc global allocator.
-/// 
+///
 /// ## Usage
 /// ```rust,ignore
 /// use mimalloc::MiMalloc;
@@ -68,10 +67,9 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_malloc(layout.size()) as *mut u8
         } else {
-            #[cfg(target_os = "macos")]
-            {
+            if cfg!(target_os = "macos") {
                 if layout.align() > (1 << 31) {
-                    return ptr::null_mut()
+                    return core::ptr::null_mut();
                 }
             }
 
@@ -84,17 +82,16 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_zalloc(layout.size()) as *mut u8
         } else {
-            #[cfg(target_os = "macos")]
-            {
+            if cfg!(target_os = "macos") {
                 if layout.align() > (1 << 31) {
-                    return ptr::null_mut()
+                    return core::ptr::null_mut();
                 }
             }
 
             mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
         }
     }
-    
+
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {
         mi_free(ptr as *const c_void);
