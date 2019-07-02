@@ -9,6 +9,10 @@ fn main() {
         cfg = cfg.define("MI_SECURE", "OFF");
     }
 
+    // Inject MI_DEBUG=0
+    // This set mi_option_verbose and mi_option_show_errors options to false.
+    cfg = cfg.define("mi_defines", "MI_DEBUG=0");
+
     if cfg!(all(windows, target_env = "msvc")) {
         // cc::get_compiler have /nologo /MD default flags that are cmake::Config
         // defaults to. Those flags prevents mimalloc from building on windows
