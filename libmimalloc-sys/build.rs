@@ -4,9 +4,10 @@ fn main() {
     let mut cfg = &mut Config::new("c_src/mimalloc");
 
     cfg = cfg.define("MI_OVERRIDE", "OFF");
+    cfg = cfg.define("MI_SECURE", "OFF");
 
     if cfg!(feature = "secure") {
-        cfg = cfg.define("MI_SECURE", "OFF");
+        cfg = cfg.define("MI_SECURE", "ON");
     }
 
     // Inject MI_DEBUG=0
