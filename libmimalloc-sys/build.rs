@@ -31,7 +31,11 @@ fn main() {
         if cfg!(debug_assertions) {
             ("./build/Debug", "mimalloc-static-debug")
         } else {
-            ("./build/Release", "mimalloc-static")
+            if cfg!(feature = "secure") {
+                ("./build/Release", "mimalloc-static-secure")
+            } else {
+                ("./build/Release", "mimalloc-static")
+            }
         }
     } else {
         if cfg!(debug_assertions) {
