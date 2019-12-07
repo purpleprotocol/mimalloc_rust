@@ -5,9 +5,15 @@ fn main() {
 
     cfg = cfg.define("MI_OVERRIDE", "OFF");
     cfg = cfg.define("MI_SECURE", "OFF");
+    cfg = cfg.define("MI_SECURE_FULL", "OFF");
+    cfg = cfg.define("MI_BUILD_TESTS", "OFF");
 
     if cfg!(feature = "secure") {
         cfg = cfg.define("MI_SECURE", "ON");
+    }
+
+    if cfg!(feature = "secure-full") {
+        cfg = cfg.define("MI_SECURE_FULL", "ON");
     }
 
     // Inject MI_DEBUG=0
@@ -29,7 +35,11 @@ fn main() {
 
     let (out_dir, out_name) = if cfg!(all(windows, target_env = "msvc")) {
         if cfg!(debug_assertions) {
-            ("./build/Debug", "mimalloc-static-debug")
+            if cfg!(feature = "secure") {
+                ("./build/Debug", "mimalloc-static-secure-debug")
+            } else {
+                ("./build/Debug", "mimalloc-static-debug")
+            }
         } else {
             if cfg!(feature = "secure") {
                 ("./build/Release", "mimalloc-static-secure")
@@ -39,7 +49,11 @@ fn main() {
         }
     } else {
         if cfg!(debug_assertions) {
-            ("./build", "mimalloc-debug")
+            if cfg!(feature = "secure") {
+                ("./build", "mimalloc-secure-debug")
+            } else {
+                ("./build", "mimalloc-debug")
+            }
         } else {
             if cfg!(feature = "secure") {
                 ("./build", "mimalloc-secure")

@@ -26,3 +26,4 @@ libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.7" }
 [features]
 default = ["secure"]
 secure = ["libmimalloc-sys/secure"]
+secure-full = ["libmimalloc-sys/secure", "libmimalloc-sys/secure-full"]
