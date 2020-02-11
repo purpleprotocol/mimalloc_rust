@@ -17,6 +17,7 @@ dist: xenial
 matrix:
   allow_failures:
     - rust: nightly
+    - os: windows
 
 addons:
   apt:
