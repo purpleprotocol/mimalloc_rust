@@ -21,6 +21,8 @@ fn main() {
     cfg = cfg.define("mi_defines", "MI_DEBUG=0");
 
     if cfg!(all(windows, target_env = "msvc")) {
+        cfg = cfg.define("CMAKE_SH", "CMAKE_SH-NOTFOUND");
+
         // cc::get_compiler have /nologo /MD default flags that are cmake::Config
         // defaults to. Those flags prevents mimalloc from building on windows
         // extracted from default cmake configuration on windows
