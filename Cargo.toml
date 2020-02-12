@@ -1,6 +1,6 @@
 [package]
 name = "mimalloc"
-version = "0.1.13"
+version = "0.1.14"
 authors = [
     "Octavian Oncescu <octavonce@gmail.com>",
     "Vincent Rouillé <vincent@speedy37.fr>",
@@ -20,7 +20,8 @@ members = ["libmimalloc-sys" ]
 travis-ci = { repository = "purpleprotocol/mimalloc_rust" }
 
 [dependencies]
-libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.10" }
+libc = "0.2"
+libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.11" }
 
 [features]
 default = ["secure"]
