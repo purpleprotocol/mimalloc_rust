@@ -10,7 +10,6 @@ description = "Sys crate wrapping the mimalloc allocator"
 license = "MIT"
 
 [dependencies]
-libc = "0.2"
 
 [build-dependencies]
 cmake = "0.1"
