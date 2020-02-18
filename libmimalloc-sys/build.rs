@@ -1,4 +1,64 @@
 use cmake::Config;
+use std::env;
+
+enum CMakeBuildType {
+    Debug,
+    Release,
+    RelWithDebInfo,
+    MinSizeRel,
+}
+
+/// Determine the CMake build type that will be picked by `cmake-rs`.
+///
+/// This is mostly pasted from `cmake-rs`:
+/// https://github.com/alexcrichton/cmake-rs/blob/7f85e323/src/lib.rs#L498
+fn get_cmake_build_type() -> Result<CMakeBuildType, String> {
+    fn getenv(v: &str) -> Result<String, String> {
+        env::var(v).map_err(|_| format!("environment variable `{}` not defined", v))
+    }
+
+    // Determine Rust's profile, optimization level, and debug info:
+    #[derive(PartialEq)]
+    enum RustProfile {
+        Debug,
+        Release,
+    }
+    #[derive(PartialEq, Debug)]
+    enum OptLevel {
+        Debug,
+        Release,
+        Size,
+    }
+
+    let rust_profile = match getenv("PROFILE")?.as_str() {
+        "debug" => RustProfile::Debug,
+        "release" | "bench" => RustProfile::Release,
+        _ => RustProfile::Release,
+    };
+
+    let opt_level = match getenv("OPT_LEVEL")?.as_str() {
+        "0" => OptLevel::Debug,
+        "1" | "2" | "3" => OptLevel::Release,
+        "s" | "z" => OptLevel::Size,
+        _ => match rust_profile {
+            RustProfile::Debug => OptLevel::Debug,
+            RustProfile::Release => OptLevel::Release,
+        },
+    };
+
+    let debug_info: bool = match getenv("DEBUG")?.as_str() {
+        "false" => false,
+        "true" => true,
+        _ => true,
+    };
+
+    Ok(match (opt_level, debug_info) {
+        (OptLevel::Debug, _) => CMakeBuildType::Debug,
+        (OptLevel::Release, false) => CMakeBuildType::Release,
+        (OptLevel::Release, true) => CMakeBuildType::RelWithDebInfo,
+        (OptLevel::Size, _) => CMakeBuildType::MinSizeRel,
+    })
+}
 
 fn main() {
     let mut cfg = &mut Config::new("c_src/mimalloc");
@@ -20,13 +80,21 @@ fn main() {
     // This set mi_option_verbose and mi_option_show_errors options to false.
     cfg = cfg.define("mi_defines", "MI_DEBUG=0");
 
+    let is_debug = match get_cmake_build_type() {
+        Ok(CMakeBuildType::Debug) => true,
+        Ok(CMakeBuildType::Release) => false,
+        Ok(CMakeBuildType::RelWithDebInfo) => false,
+        Ok(CMakeBuildType::MinSizeRel) => false,
+        Err(e) => panic!("Cannot determine CMake build type: {}", e),
+    };
+
     if cfg!(all(windows, target_env = "msvc")) {
         cfg = cfg.define("CMAKE_SH", "CMAKE_SH-NOTFOUND");
 
         // cc::get_compiler have /nologo /MD default flags that are cmake::Config
         // defaults to. Those flags prevents mimalloc from building on windows
         // extracted from default cmake configuration on windows
-        if cfg!(debug_assertions) {
+        if is_debug {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_DEBUG
             cfg = cfg.cflag("/DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1");
         } else {
@@ -36,7 +104,7 @@ fn main() {
     }
 
     let (out_dir, out_name) = if cfg!(all(windows, target_env = "msvc")) {
-        if cfg!(debug_assertions) {
+        if is_debug {
             if cfg!(feature = "secure") {
                 ("./build/Debug", "mimalloc-static-secure-debug")
             } else {
@@ -50,7 +118,7 @@ fn main() {
             }
         }
     } else {
-        if cfg!(debug_assertions) {
+        if is_debug {
             if cfg!(feature = "secure") {
                 ("./build", "mimalloc-secure-debug")
             } else {
