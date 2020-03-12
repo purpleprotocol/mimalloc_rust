@@ -94,15 +94,15 @@ unsafe impl GlobalAlloc for MiMalloc {
 
     #[inline]
     unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {
-        mi_free(ptr as *const c_void);
+        mi_free(ptr as *mut c_void);
     }
 
     #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
-            mi_realloc(ptr as *const c_void, new_size) as *mut u8
+            mi_realloc(ptr as *mut c_void, new_size) as *mut u8
         } else {
-            mi_realloc_aligned(ptr as *const c_void, new_size, layout.align()) as *mut u8
+            mi_realloc_aligned(ptr as *mut c_void, new_size, layout.align()) as *mut u8
         }
     }
 }
