@@ -64,16 +64,12 @@ fn main() {
     let mut cfg = &mut Config::new("c_src/mimalloc");
 
     cfg = cfg.define("MI_OVERRIDE", "OFF");
-    cfg = cfg.define("MI_SECURE", "OFF");
-    cfg = cfg.define("MI_SECURE_FULL", "OFF");
     cfg = cfg.define("MI_BUILD_TESTS", "OFF");
 
     if cfg!(feature = "secure") {
         cfg = cfg.define("MI_SECURE", "ON");
-    }
-
-    if cfg!(feature = "secure-full") {
-        cfg = cfg.define("MI_SECURE_FULL", "ON");
+    } else {
+        cfg = cfg.define("MI_SECURE", "OFF");
     }
 
     // Inject MI_DEBUG=0

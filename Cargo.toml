@@ -14,15 +14,14 @@ license = "MIT"
 readme = "README.md"
 
 [workspace]
-members = ["libmimalloc-sys" ]
+members = ["libmimalloc-sys"]
 
 [badges]
 travis-ci = { repository = "purpleprotocol/mimalloc_rust" }
 
 [dependencies]
-libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.13" }
+libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.13", default-features = false }
 
 [features]
 default = ["secure"]
 secure = ["libmimalloc-sys/secure"]
-secure-full = ["libmimalloc-sys/secure", "libmimalloc-sys/secure-full"]
