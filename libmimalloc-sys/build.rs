@@ -76,11 +76,11 @@ fn main() {
     // This set mi_option_verbose and mi_option_show_errors options to false.
     cfg = cfg.define("mi_defines", "MI_DEBUG=0");
 
-    let is_debug = match get_cmake_build_type() {
-        Ok(CMakeBuildType::Debug) => true,
-        Ok(CMakeBuildType::Release) => false,
-        Ok(CMakeBuildType::RelWithDebInfo) => false,
-        Ok(CMakeBuildType::MinSizeRel) => false,
+    let (is_debug, win_folder) = match get_cmake_build_type() {
+        Ok(CMakeBuildType::Debug) => (true, "Debug"),
+        Ok(CMakeBuildType::Release) => (false, "Release"),
+        Ok(CMakeBuildType::RelWithDebInfo) => (false, "RelWithDebInfo"),
+        Ok(CMakeBuildType::MinSizeRel) => (false, "MinSizeRel"),
         Err(e) => panic!("Cannot determine CMake build type: {}", e),
     };
 
@@ -99,32 +99,37 @@ fn main() {
         }
     }
 
-    let (out_dir, out_name) = if cfg!(all(windows, target_env = "msvc")) {
+    let mut out_dir = "./build".to_string();
+    if cfg!(all(windows, target_env = "msvc")) {
+        out_dir.push_str("/");
+        out_dir.push_str(win_folder);
+    }
+    let out_name = if cfg!(all(windows, target_env = "msvc")) {
         if is_debug {
             if cfg!(feature = "secure") {
-                ("./build/Debug", "mimalloc-static-secure-debug")
+                "mimalloc-static-secure-debug"
             } else {
-                ("./build/Debug", "mimalloc-static-debug")
+                "mimalloc-static-debug"
             }
         } else {
             if cfg!(feature = "secure") {
-                ("./build/Release", "mimalloc-static-secure")
+                "mimalloc-static-secure"
             } else {
-                ("./build/Release", "mimalloc-static")
+                "mimalloc-static"
             }
         }
     } else {
         if is_debug {
             if cfg!(feature = "secure") {
-                ("./build", "mimalloc-secure-debug")
+                "mimalloc-secure-debug"
             } else {
-                ("./build", "mimalloc-debug")
+                "mimalloc-debug"
             }
         } else {
             if cfg!(feature = "secure") {
-                ("./build", "mimalloc-secure")
+                "mimalloc-secure"
             } else {
-                ("./build", "mimalloc")
+                "mimalloc"
             }
         }
     };
