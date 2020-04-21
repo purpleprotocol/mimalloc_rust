@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
+        with:
+          submodules: recursive
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -57,6 +59,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+        with:
+          submodules: recursive
 
       - uses: actions-rs/toolchain@v1
         with:
