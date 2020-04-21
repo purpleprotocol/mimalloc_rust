@@ -26,8 +26,8 @@
 extern crate libmimalloc_sys as ffi;
 
 use core::alloc::{GlobalAlloc, Layout};
-use ffi::*;
 use core::ffi::c_void;
+use ffi::*;
 
 // Copied from https://github.com/rust-lang/rust/blob/master/src/libstd/sys_common/alloc.rs
 #[cfg(all(any(
