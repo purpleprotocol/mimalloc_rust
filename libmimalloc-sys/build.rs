@@ -63,7 +63,12 @@ fn get_cmake_build_type() -> Result<CMakeBuildType, String> {
 fn main() {
     let mut cfg = &mut Config::new("c_src/mimalloc");
 
-    cfg = cfg.define("MI_OVERRIDE", "OFF");
+    if cfg!(feature = "override") {
+        cfg = cfg.define("MI_OVERRIDE", "ON");
+    } else {
+        cfg = cfg.define("MI_OVERRIDE", "OFF");
+    }
+
     cfg = cfg.define("MI_BUILD_TESTS", "OFF");
 
     if cfg!(feature = "secure") {
