@@ -25,3 +25,4 @@ libmimalloc-sys = { path = "libmimalloc-sys", version = "0.1.15", default-featur
 [features]
 default = ["secure"]
 secure = ["libmimalloc-sys/secure"]
+override = ["libmimalloc-sys/override"]
