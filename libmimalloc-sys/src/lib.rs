@@ -9,7 +9,7 @@ extern "C" {
     pub fn mi_zalloc_aligned(size: usize, alignment: usize) -> *mut c_void;
     pub fn mi_malloc_aligned(size: usize, alignment: usize) -> *mut c_void;
     pub fn mi_realloc_aligned(p: *mut c_void, size: usize, alignment: usize) -> *mut c_void;
-    pub fn mi_free(p: *mut c_void) -> c_void;
+    pub fn mi_free(p: *mut c_void);
     pub fn mi_usable_size(p: *mut c_void) -> usize;
 }
 
