@@ -1,6 +1,11 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  # Run daily to catch when Rust updates cause problems to happen.
+  schedule:
+    - cron: '00 01 * * *'
 
 jobs:
   rust:
