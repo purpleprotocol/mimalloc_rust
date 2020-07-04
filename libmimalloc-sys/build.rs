@@ -1,3 +1,4 @@
+#![allow(clippy::collapsible_if)]
 use cmake::Config;
 use std::env;
 
