@@ -2,6 +2,11 @@
 
 use core::ffi::c_void;
 
+#[cfg(feature = "extended")]
+mod extended;
+#[cfg(feature = "extended")]
+pub use extended::*;
+
 extern "C" {
     /// Allocate zero-initialized `size` bytes.
     ///
