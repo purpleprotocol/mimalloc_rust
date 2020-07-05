@@ -173,7 +173,7 @@ extern "C" {
     /// function or stderr by default.
     ///
     /// Most detailed when using a debug build.
-    pub fn mi_stats_print(_: *const c_void);
+    pub fn mi_stats_print(_: *mut c_void);
 
     /// Print the main statistics.
     ///
@@ -181,7 +181,7 @@ extern "C" {
     /// passed as it's second parameter.
     ///
     /// Most detailed when using a debug build.
-    pub fn mi_stats_print_out(out: Option<mi_output_fun>, arg: *mut c_void);
+    pub fn mi_stats_print_out(out: mi_output_fun, arg: *mut c_void);
 
     /// Reset statistics.
     ///
@@ -193,11 +193,22 @@ extern "C" {
     /// Note: This function is thread safe.
     pub fn mi_stats_merge();
 
+    /// Return the mimalloc version number.
+    ///
+    /// For example version 1.6.3 would return the number `163`.
+    pub fn mi_version() -> c_int;
+
     /// Initialize mimalloc on a thread.
     ///
     /// Should not be used as on most systems (pthreads, windows) this is done
     /// automatically.
     pub fn mi_thread_init();
+
+    /// Initialize the process.
+    ///
+    /// Should not be used on most systems, as it's called by thread_init or the
+    /// process loader.
+    pub fn mi_process_init();
 
     /// Uninitialize mimalloc on a thread.
     ///
@@ -216,7 +227,7 @@ extern "C" {
     /// Most detailed when using a debug build.
     ///
     /// Note: This function is thread safe.
-    pub fn mi_thread_stats_print_out(out: Option<mi_output_fun>, arg: *mut c_void);
+    pub fn mi_thread_stats_print_out(out: mi_output_fun, arg: *mut c_void);
 
     /// Register an output function.
     ///
@@ -227,7 +238,7 @@ extern "C" {
     /// like verbose or warning messages.
     ///
     /// Note: This function is thread safe.
-    pub fn mi_register_output(out: Option<mi_output_fun>, arg: *mut c_void);
+    pub fn mi_register_output(out: mi_output_fun, arg: *mut c_void);
 
     /// Register a deferred free function.
     ///
@@ -255,7 +266,7 @@ extern "C" {
     /// At most one `deferred_free` function can be active.
     ///
     /// Note: This function is thread safe.
-    pub fn mi_register_deferred_free(out: Option<mi_deferred_free_fun>, arg: *mut c_void);
+    pub fn mi_register_deferred_free(out: mi_deferred_free_fun, arg: *mut c_void);
 
     /// Register an error callback function.
     ///
@@ -278,13 +289,13 @@ extern "C" {
     /// - `EINVAL` (22): Trying to free or re-allocate an invalid pointer.
     ///
     /// Note: This function is thread safe.
-    pub fn mi_register_error(out: Option<mi_error_fun>, arg: *mut c_void);
+    pub fn mi_register_error(out: mi_error_fun, arg: *mut c_void);
 }
 
 /// An output callback. Must be thread-safe.
 ///
 /// See [`mi_stats_print_out`], [`mi_thread_stats_print_out`], [`mi_register_output`]
-pub type mi_output_fun = unsafe extern "C" fn(msg: *const c_char, arg: *mut c_void);
+pub type mi_output_fun = Option<unsafe extern "C" fn(msg: *const c_char, arg: *mut c_void)>;
 
 /// Type of deferred free functions. Must be thread-safe.
 ///
@@ -294,7 +305,7 @@ pub type mi_output_fun = unsafe extern "C" fn(msg: *const c_char, arg: *mut c_vo
 ///
 /// See [`mi_register_deferred_free`]
 pub type mi_deferred_free_fun =
-    unsafe extern "C" fn(force: bool, heartbeat: c_ulonglong, arg: *mut c_void);
+    Option<unsafe extern "C" fn(force: bool, heartbeat: c_ulonglong, arg: *mut c_void)>;
 
 /// Type of error callback functions. Must be thread-safe.
 ///
@@ -302,19 +313,14 @@ pub type mi_deferred_free_fun =
 /// - `arg`: Argument that was passed at registration to hold extra state.
 ///
 /// See [`mi_register_error`]
-pub type mi_error_fun = unsafe extern "C" fn(code: c_int, arg: *mut c_void);
-
-/// Runtime options. Only exists to make ctest happy since this was defined as
-/// `typedef enum mi_option_e { ... } mi_option_t;`...
-#[doc(hidden)]
-pub type mi_option_e = c_int;
+pub type mi_error_fun = Option<unsafe extern "C" fn(code: c_int, arg: *mut c_void)>;
 
 /// Runtime options. All options are false by default.
 ///
 /// Note: Currently experimental options (values > `mi_option_verbose` are not
 /// given named constants), as they may change and make exposing a stable API
 /// difficult.
-pub type mi_option_t = mi_option_e;
+pub type mi_option_t = c_int;
 
 // Note: mimalloc doc website seems to have the order of show_stats and
 // show_errors reversed as of 1.6.3, however what I have here is correct:
@@ -336,7 +342,7 @@ extern "C" {
     /// Returns true if the provided option is enabled.
     ///
     /// Note: this function is not thread safe.
-    pub fn mi_option_enabled(option: mi_option_t) -> bool;
+    pub fn mi_option_is_enabled(option: mi_option_t) -> bool;
 
     /// Enable or disable the given option.
     ///
@@ -391,13 +397,7 @@ extern "C" {
     ///
     /// Note: this function is not thread safe.
     pub fn mi_option_set_default(option: mi_option_t, value: c_long);
-
 }
-
-#[doc(hidden)]
-pub type mi_heap_s = mi_heap_t;
-#[doc(hidden)]
-pub type mi_heap_area_s = mi_heap_area_t;
 
 /// First-class heaps that can be destroyed in one go.
 ///
@@ -424,17 +424,13 @@ pub type mi_heap_area_s = mi_heap_area_t;
 ///     mi::mi_heap_delete(h);
 /// }
 /// ```
-#[repr(C)]
-pub struct mi_heap_t {
-    _priv: [u8; 0],
-}
+pub enum mi_heap_t {}
 
 /// An area of heap space contains blocks of a single size.
 ///
 /// The bytes in freed blocks are `committed - used`.
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-#[non_exhaustive]
 pub struct mi_heap_area_t {
     /// Start of the area containing heap blocks.
     pub blocks: *mut c_void,
@@ -448,20 +444,6 @@ pub struct mi_heap_area_t {
     pub block_size: usize,
 }
 
-// Provide a default impl so that the `non_exhaustive` bound is not too painful.
-impl Default for mi_heap_area_t {
-    #[inline]
-    fn default() -> Self {
-        Self {
-            blocks: core::ptr::null_mut(),
-            reserved: 0,
-            committed: 0,
-            used: 0,
-            block_size: 0,
-        }
-    }
-}
-
 /// Visitor function passed to [`mi_heap_visit_blocks`]
 ///
 /// Should return `true` to continue, and `false` to stop visiting (i.e. break)
@@ -469,13 +451,15 @@ impl Default for mi_heap_area_t {
 /// This function is always first called for every `area` with `block` as a null
 /// pointer. If `visit_all_blocks` was `true`, the function is then called for
 /// every allocated block in that area.
-pub type mi_block_visit_fun = unsafe extern "C" fn(
-    heap: *const mi_heap_t,
-    area: *const mi_heap_area_t,
-    block: *mut c_void,
-    block_size: usize,
-    arg: *mut c_void,
-) -> bool;
+pub type mi_block_visit_fun = Option<
+    unsafe extern "C" fn(
+        heap: *const mi_heap_t,
+        area: *const mi_heap_area_t,
+        block: *mut c_void,
+        block_size: usize,
+        arg: *mut c_void,
+    ) -> bool,
+>;
 
 extern "C" {
     /// Create a new heap that can be used for allocation.
@@ -517,7 +501,7 @@ extern "C" {
 
     /// Release outstanding resources in a specific heap.
     ///
-    /// Similar to to [`mi_collect`], but takes the heap to collect as an argument.
+    /// See also [`mi_collect`].
     pub fn mi_heap_collect(heap: *mut mi_heap_t, force: bool);
 
     /// Equivalent to [`mi_malloc`](crate::mi_malloc), but allocates out of the
@@ -689,6 +673,8 @@ extern "C" {
     /// `arg` is an extra argument passed into the `visitor`.
     ///
     /// Returns `true` if all areas and blocks were visited.
+    ///
+    /// Passing a `None` visitor is allowed, and is a no-op.
     pub fn mi_heap_visit_blocks(
         heap: *const mi_heap_t,
         visit_all_blocks: bool,

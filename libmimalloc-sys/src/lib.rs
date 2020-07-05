@@ -65,8 +65,8 @@ extern "C" {
 
     /// Return the available bytes in a memory block.
     ///
-    /// The returned size can be used to call [`mi_expand`] successfully.
-    pub fn mi_usable_size(p: *mut c_void) -> usize;
+    /// The returned size can be used to call `mi_expand` successfully.
+    pub fn mi_usable_size(p: *const c_void) -> usize;
 }
 
 #[cfg(test)]
