@@ -8,6 +8,7 @@ keywords = ["allocator", "encrypted-heap", "performance"]
 categories = ["allocator"]
 description = "Sys crate wrapping the mimalloc allocator"
 license = "MIT"
+links = "mimalloc"
 
 [dependencies]
 
