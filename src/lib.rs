@@ -67,10 +67,8 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_malloc(layout.size()) as *mut u8
         } else {
-            if cfg!(target_os = "macos") {
-                if layout.align() > (1 << 31) {
-                    return core::ptr::null_mut();
-                }
+            if cfg!(target_os = "macos") && layout.align() > (1 << 31) {
+                return core::ptr::null_mut();
             }
 
             mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
@@ -82,10 +80,8 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_zalloc(layout.size()) as *mut u8
         } else {
-            if cfg!(target_os = "macos") {
-                if layout.align() > (1 << 31) {
-                    return core::ptr::null_mut();
-                }
+            if cfg!(target_os = "macos") && layout.align() > (1 << 31) {
+                return core::ptr::null_mut();
             }
 
             mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
@@ -117,7 +113,7 @@ mod tests {
             let layout = Layout::from_size_align(8, 8).unwrap();
             let alloc = MiMalloc;
 
-            let ptr = alloc.alloc(layout.clone());
+            let ptr = alloc.alloc(layout);
             alloc.dealloc(ptr, layout);
         }
     }
@@ -128,7 +124,7 @@ mod tests {
             let layout = Layout::from_size_align(8, 8).unwrap();
             let alloc = MiMalloc;
 
-            let ptr = alloc.alloc_zeroed(layout.clone());
+            let ptr = alloc.alloc_zeroed(layout);
             alloc.dealloc(ptr, layout);
         }
     }
@@ -139,8 +135,8 @@ mod tests {
             let layout = Layout::from_size_align(8, 8).unwrap();
             let alloc = MiMalloc;
 
-            let ptr = alloc.alloc(layout.clone());
-            let ptr = alloc.realloc(ptr, layout.clone(), 16);
+            let ptr = alloc.alloc(layout);
+            let ptr = alloc.realloc(ptr, layout, 16);
             alloc.dealloc(ptr, layout);
         }
     }
