@@ -11,6 +11,7 @@ license = "MIT"
 links = "mimalloc"
 
 [dependencies]
+cty = { version = "0.2", optional = true }
 
 [build-dependencies]
 cmake = "0.1"
@@ -18,3 +19,8 @@ cmake = "0.1"
 [features]
 secure = []
 override = []
+extended = ["cty"]
+
+# Show `extended` on docs.rs since it's the full API surface.
+[package.metadata.docs.rs]
+features = ["extended"]
