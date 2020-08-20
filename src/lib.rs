@@ -67,7 +67,8 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_malloc(layout.size()) as *mut u8
         } else {
-            if cfg!(target_os = "macos") && layout.align() > (1 << 31) {
+            #[cfg(target_os = "macos")]
+            if layout.align() > (1 << 31) {
                 return core::ptr::null_mut();
             }
 
@@ -80,7 +81,8 @@ unsafe impl GlobalAlloc for MiMalloc {
         if layout.align() <= MIN_ALIGN && layout.align() <= layout.size() {
             mi_zalloc(layout.size()) as *mut u8
         } else {
-            if cfg!(target_os = "macos") && layout.align() > (1 << 31) {
+            #[cfg(target_os = "macos")]
+            if layout.align() > (1 << 31) {
                 return core::ptr::null_mut();
             }
 
@@ -119,9 +121,31 @@ mod tests {
     }
 
     #[test]
+    fn it_frees_allocated_big_memory() {
+        unsafe {
+            let layout = Layout::from_size_align(1 << 20, 32).unwrap();
+            let alloc = MiMalloc;
+
+            let ptr = alloc.alloc(layout);
+            alloc.dealloc(ptr, layout);
+        }
+    }
+
+    #[test]
     fn it_frees_zero_allocated_memory() {
         unsafe {
             let layout = Layout::from_size_align(8, 8).unwrap();
+            let alloc = MiMalloc;
+
+            let ptr = alloc.alloc_zeroed(layout);
+            alloc.dealloc(ptr, layout);
+        }
+    }
+
+    #[test]
+    fn it_frees_zero_allocated_big_memory() {
+        unsafe {
+            let layout = Layout::from_size_align(1 << 20, 32).unwrap();
             let alloc = MiMalloc;
 
             let ptr = alloc.alloc_zeroed(layout);
@@ -137,6 +161,18 @@ mod tests {
 
             let ptr = alloc.alloc(layout);
             let ptr = alloc.realloc(ptr, layout, 16);
+            alloc.dealloc(ptr, layout);
+        }
+    }
+
+    #[test]
+    fn it_frees_reallocated_big_memory() {
+        unsafe {
+            let layout = Layout::from_size_align(1 << 20, 32).unwrap();
+            let alloc = MiMalloc;
+
+            let ptr = alloc.alloc(layout);
+            let ptr = alloc.realloc(ptr, layout, 2 << 20);
             alloc.dealloc(ptr, layout);
         }
     }
