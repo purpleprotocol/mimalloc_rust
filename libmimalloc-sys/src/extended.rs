@@ -331,10 +331,10 @@ pub const mi_option_show_stats: mi_option_t = 1;
 /// Option allowing printing verbose messages to stderr.
 pub const mi_option_verbose: mi_option_t = 2;
 
-/// Option specifying eagerly commit segments (4MiB) (enabled by default).
+/// Option (experimental) specifying eagerly commit segments (4MiB) (enabled by default).
 pub const mi_option_eager_commit: mi_option_t = 3;
 
-/// Option specifying eagerly commit large (256MiB) memory regions (enabled by default, except on Windows).
+/// Option (experimental) specifying eagerly commit large (256MiB) memory regions (enabled by default, except on Windows).
 pub const mi_option_eager_region_commit: mi_option_t = 4;
 
 /// Option (experimental) to use large OS pages (2MiB in size) if possible.
