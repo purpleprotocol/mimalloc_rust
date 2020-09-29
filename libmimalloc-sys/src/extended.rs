@@ -760,13 +760,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn runtime_option() {
+    fn runtime_option_page_reset() {
         unsafe {
-            mi_option_set(mi_option_page_reset, 12);
-            assert_eq!(mi_option_get(mi_option_page_reset), 12);
+            // page reset
+            assert_eq!(mi_option_get(mi_option_page_reset), 1);
+            mi_option_set(mi_option_page_reset, 2);
+            assert_eq!(mi_option_get(mi_option_page_reset), 2);
 
-            mi_option_set(mi_option_reset_delay, 10000);
-            assert_eq!(mi_option_get(mi_option_reset_delay), 10000);
+            // page reset delay
+            assert_eq!(mi_option_get(mi_option_reset_delay), 100);
+            mi_option_set(mi_option_reset_delay, 10_000);
+            assert_eq!(mi_option_get(mi_option_reset_delay), 10_000);
         }
     }
 }
