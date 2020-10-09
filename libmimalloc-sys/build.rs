@@ -78,6 +78,12 @@ fn main() {
         cfg = cfg.define("MI_SECURE", "OFF");
     }
 
+    if cfg!(feature = "local_dynamic_tls") {
+        cfg = cfg.define("MI_LOCAL_DYNAMIC_TLS", "ON");
+    } else {
+        cfg = cfg.define("MI_LOCAL_DYNAMIC_TLS", "OFF");
+    }
+
     // Inject MI_DEBUG=0
     // This set mi_option_verbose and mi_option_show_errors options to false.
     cfg = cfg.define("mi_defines", "MI_DEBUG=0");
