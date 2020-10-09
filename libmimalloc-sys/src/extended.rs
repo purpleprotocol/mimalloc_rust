@@ -316,10 +316,6 @@ pub type mi_deferred_free_fun =
 pub type mi_error_fun = Option<unsafe extern "C" fn(code: c_int, arg: *mut c_void)>;
 
 /// Runtime options. All options are false by default.
-///
-/// Note: Currently experimental options (values > `mi_option_verbose` are not
-/// given named constants), as they may change and make exposing a stable API
-/// difficult.
 pub type mi_option_t = c_int;
 
 // Note: mimalloc doc website seems to have the order of show_stats and
@@ -334,6 +330,82 @@ pub const mi_option_show_stats: mi_option_t = 1;
 
 /// Option allowing printing verbose messages to stderr.
 pub const mi_option_verbose: mi_option_t = 2;
+
+/// Option (experimental) specifying eagerly commit segments (4MiB) (enabled by default).
+pub const mi_option_eager_commit: mi_option_t = 3;
+
+/// Option (experimental) specifying eagerly commit large (256MiB) memory regions (enabled by default, except on Windows).
+pub const mi_option_eager_region_commit: mi_option_t = 4;
+
+/// Experimental
+pub const mi_option_reset_decommits: mi_option_t = 5;
+
+/// Option (experimental) to use large OS pages (2MiB in size) if possible.
+///
+/// Use large OS pages (2MiB) when available; for some workloads this can
+/// significantly improve performance. Use mi_option_verbose to check if
+/// the large OS pages are enabled -- usually one needs to explicitly allow
+/// large OS pages (as on Windows and Linux). However, sometimes the OS is
+/// very slow to reserve contiguous physical memory for large OS pages so
+/// use with care on systems that can have fragmented memory (for that
+/// reason, we generally recommend to use mi_option_reserve_huge_os_pages
+/// instead whenever possible).
+pub const mi_option_large_os_pages: mi_option_t = 6;
+
+/// Option (experimental) specifying number of huge OS pages (1GiB in size) to reserve at the start of the program.
+///
+/// This reserves the huge pages at startup and sometimes this can give a large (latency) performance
+/// improvement on big workloads. Usually it is better to not use MIMALLOC_LARGE_OS_PAGES in
+/// combination with this setting. Just like large OS pages, use with care as reserving contiguous
+/// physical memory can take a long time when memory is fragmented (but reserving the huge pages is
+/// done at startup only once). Note that we usually need to explicitly enable huge OS pages (as on
+/// Windows and Linux)). With huge OS pages, it may be beneficial to set the setting
+/// mi_option_eager_commit_delay=N (N is 1 by default) to delay the initial N segments (of 4MiB) of
+/// a thread to not allocate in the huge OS pages; this prevents threads that are short lived and
+/// allocate just a little to take up space in the huge OS page area (which cannot be reset).
+pub const mi_option_reserve_huge_os_pages: mi_option_t = 7;
+
+/// Option (experimental) specifying number of segments per thread to keep cached.
+pub const mi_option_segment_cache: mi_option_t = 8;
+
+/// Option (experimental) to reset page memory after mi_option_reset_delay milliseconds when it becomes free.
+///
+/// By default, mimalloc will reset (or purge) OS pages that are not in use, to signal to the OS
+/// that the underlying physical memory can be reused. This can reduce memory fragmentation in
+/// long running (server) programs. By setting it to 0 this will no longer be done which can improve
+/// performance for batch-like programs. As an alternative, the mi_option_reset_delay= can be set
+/// higher (100ms by default) to make the page reset occur less frequently instead of turning it
+/// off completely.
+///
+/// Default: 1 (true)
+pub const mi_option_page_reset: mi_option_t = 9;
+
+/// Experimental
+pub const mi_option_abandoned_page_reset: mi_option_t = 10;
+
+/// Experimental
+pub const mi_option_segment_reset: mi_option_t = 11;
+
+/// Experimental
+pub const mi_option_eager_commit_delay: mi_option_t = 12;
+
+/// Option (experimental) specifying delay in milli-seconds before resetting a page (100ms by default).
+pub const mi_option_reset_delay: mi_option_t = 13;
+
+/// Option (experimental) to pretend there are at most N NUMA nodes.
+///
+/// If not set, the actual NUMA nodes are detected at runtime. Setting N to 1 may avoid
+/// problems in some virtual environments. Also, setting it to a lower number than the
+/// actual NUMA nodes is fine and will only cause threads to potentially allocate more
+/// memory across actual NUMA nodes (but this can happen in any case as NUMA local
+/// allocation is always a best effort but not guaranteed).
+pub const mi_option_use_numa_nodes: mi_option_t = 14;
+
+/// Option (experimental) specifying OS tag to assign to mimalloc'd memory.
+pub const mi_option_os_tag: mi_option_t = 15;
+
+/// Experimental
+pub const mi_option_max_errors: mi_option_t = 16;
 
 extern "C" {
     // Note: mi_option_{enable,disable} aren't exposed because they're redundant
@@ -681,4 +753,24 @@ extern "C" {
         visitor: mi_block_visit_fun,
         arg: *mut c_void,
     ) -> bool;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn runtime_option_page_reset() {
+        unsafe {
+            // page reset
+            assert_eq!(mi_option_get(mi_option_page_reset), 1);
+            mi_option_set(mi_option_page_reset, 2);
+            assert_eq!(mi_option_get(mi_option_page_reset), 2);
+
+            // page reset delay
+            assert_eq!(mi_option_get(mi_option_reset_delay), 100);
+            mi_option_set(mi_option_reset_delay, 10_000);
+            assert_eq!(mi_option_get(mi_option_reset_delay), 10_000);
+        }
+    }
 }
