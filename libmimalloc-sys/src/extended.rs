@@ -104,6 +104,12 @@ extern "C" {
     /// This is a [`mi_zalloc`](crate::mi_zalloc) equivalent of [`mi_malloc_aligned_at`].
     pub fn mi_zalloc_aligned_at(size: usize, alignment: usize, offset: usize) -> *mut c_void;
 
+    /// Allocate `size` of bytes aligned by `alignment` and place the address of the
+    /// allocated memory to `ptr`.
+    ///
+    /// Returns zero on success, invalid argument for invalid alignment, or out-of-memory.
+    pub fn mi_posix_memalign(ptr: *mut *mut c_void, alignment: usize, size: usize) -> c_int;
+
     /// Allocate `size * count` bytes aligned by `alignment` at a specified
     /// `offset`, zero-initialized.
     ///
