@@ -20,6 +20,13 @@ extern "C" {
     /// Returns a unique pointer if called with `size` 0.
     pub fn mi_malloc(size: usize) -> *mut c_void;
 
+    /// Allocate `count` items of `size` length each.
+    ///
+    /// Returns `null` if `count * size` overflows or on out-of-memory.
+    ///
+    /// All items are initialized to zero.
+    pub fn mi_calloc(count: usize, size: usize) -> *mut c_void;
+
     /// Re-allocate memory to `newsize` bytes.
     ///
     /// Return pointer to the allocated memory or null if out of memory. If null
