@@ -1,0 +1,19 @@
+[target.i686-unknown-linux-gnu]
+rustflags = ["-C", "link-args=-Wl,-export-dynamic"]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "link-args=-Wl,-export-dynamic"]
+
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-args=-rdynamic"]
+
+[target.x86_64-pc-windows-gnu]
+rustflags = [
+    "-C","linker=gcc","-C", "link-args=-fuse-ld=lld -larchive -lbcrypt","-C", "opt-level=3", "-C", "inline-threshold=275","-C", "link-self-contained=no"
+]
+
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld"
+rustflags = ["-C","target-feature=+crt-static"]
+
+
