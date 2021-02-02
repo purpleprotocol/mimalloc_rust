@@ -95,8 +95,8 @@ fn main() {
         Ok(CMakeBuildType::MinSizeRel) => (false, "MinSizeRel"),
         Err(e) => panic!("Cannot determine CMake build type: {}", e),
     };
-
-    if cfg!(all(windows, target_env = "msvc")) {
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
+    if target_env == "msvc" {
         cfg = cfg.define("CMAKE_SH", "CMAKE_SH-NOTFOUND");
 
         // cc::get_compiler have /nologo /MD default flags that are cmake::Config
@@ -109,47 +109,50 @@ fn main() {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_RELEASE
             cfg = cfg.cflag("/DWIN32 /D_WINDOWS /W3 /MD /O2 /Ob2 /DNDEBUG");
         }
-    }
+    } else if target_env == "gnu" {
+        cfg = cfg.define("CMAKE_SH", "CMAKE_SH-NOTFOUND");
+        //  Those flags prevents mimalloc from building on windows
+        if is_debug {
+            // CMAKE_C_FLAGS + CMAKE_C_FLAGS_DEBUG
+            cfg = cfg.cflag("-static -ffunction-sections -fdata-sections -m64 -O2 -fpic");
+        } else {
+            // CMAKE_C_FLAGS + CMAKE_C_FLAGS_RELEASE
+            cfg = cfg.cflag("-static -ffunction-sections -fdata-sections -m64 -O3 -fpic");
+        }
+    };
 
     let mut out_dir = "./build".to_string();
-    if cfg!(all(windows, target_env = "msvc")) {
+    if cfg!(all(windows)) {
         out_dir.push('/');
         out_dir.push_str(win_folder);
     }
-    let out_name = if cfg!(all(windows, target_env = "msvc")) {
+    let out_name = if cfg!(all(windows)) {
         if is_debug {
             if cfg!(feature = "secure") {
                 "mimalloc-static-secure-debug"
             } else {
                 "mimalloc-static-debug"
             }
+        } else if cfg!(feature = "secure") {
+            "mimalloc-static-secure"
         } else {
-            if cfg!(feature = "secure") {
-                "mimalloc-static-secure"
-            } else {
-                "mimalloc-static"
-            }
+            "mimalloc-static"
         }
+    } else if is_debug {
+        if cfg!(feature = "secure") {
+            "mimalloc-secure-debug"
+        } else {
+            "mimalloc-debug"
+        }
+    } else if cfg!(feature = "secure") {
+        "mimalloc-secure"
     } else {
-        if is_debug {
-            if cfg!(feature = "secure") {
-                "mimalloc-secure-debug"
-            } else {
-                "mimalloc-debug"
-            }
-        } else {
-            if cfg!(feature = "secure") {
-                "mimalloc-secure"
-            } else {
-                "mimalloc"
-            }
-        }
+        "mimalloc"
     };
 
     // Build mimalloc-static
     let mut dst = cfg.build_target("mimalloc-static").build();
     dst.push(out_dir);
-
     println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib={}", out_name);
 }
