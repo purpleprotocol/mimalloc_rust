@@ -123,8 +123,10 @@ fn main() {
 
     let mut out_dir = "./build".to_string();
     if cfg!(all(windows)) {
-        out_dir.push('/');
-        out_dir.push_str(win_folder);
+        if target_env == "msvc" {
+            out_dir.push('/');
+            out_dir.push_str(win_folder);
+        }
     }
     let out_name = if cfg!(all(windows)) {
         if is_debug {
