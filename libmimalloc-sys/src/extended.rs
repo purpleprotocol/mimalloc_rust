@@ -110,6 +110,12 @@ extern "C" {
     /// Returns zero on success, invalid argument for invalid alignment, or out-of-memory.
     pub fn mi_posix_memalign(ptr: *mut *mut c_void, alignment: usize, size: usize) -> c_int;
 
+    /// Allocate `size` bytes aligned by `alignment` with alignment as the first
+    /// parameter.
+    ///
+    /// Return pointer to the allocated memory or null if out of memory.
+    pub fn mi_aligned_alloc(alignment: usize, size: usize) -> *mut c_void;
+
     /// Allocate `size * count` bytes aligned by `alignment` at a specified
     /// `offset`, zero-initialized.
     ///
