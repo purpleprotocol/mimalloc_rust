@@ -95,6 +95,14 @@ fn main() {
         Ok(CMakeBuildType::MinSizeRel) => (false, "MinSizeRel"),
         Err(e) => panic!("Cannot determine CMake build type: {}", e),
     };
+
+    // Turning off shared lib, tests, PADDING.
+    // See also: https://github.com/microsoft/mimalloc/blob/master/CMakeLists.txt
+    cfg = cfg.define("MI_PADDING", "OFF");
+    cfg = cfg.define("MI_BUILD_TESTS", "OFF");
+    cfg = cfg.define("MI_BUILD_SHARED", "OFF");
+    cfg = cfg.define("MI_BUILD_OBJECT", "OFF");
+
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
     if target_env == "msvc" {
         cfg = cfg.define("CMAKE_SH", "CMAKE_SH-NOTFOUND");
@@ -114,10 +122,10 @@ fn main() {
         //  Those flags prevents mimalloc from building on windows
         if is_debug {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_DEBUG
-            cfg = cfg.cflag("-static -ffunction-sections -fdata-sections -m64 -O2 -fpic");
+            cfg = cfg.cflag("-ffunction-sections -fdata-sections -m64 -O2 -fpic");
         } else {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_RELEASE
-            cfg = cfg.cflag("-static -ffunction-sections -fdata-sections -m64 -O3 -fpic");
+            cfg = cfg.cflag("-ffunction-sections -fdata-sections -m64 -O3 -fpic");
         }
     };
 
