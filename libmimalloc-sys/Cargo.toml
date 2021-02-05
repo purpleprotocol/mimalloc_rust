@@ -1,11 +1,11 @@
 [package]
 name = "libmimalloc-sys"
-version = "0.1.19"
+version = "0.1.20"
 authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/purpleprotocol/mimalloc_rust/tree/master/libmimalloc-sys"
 keywords = ["allocator", "encrypted-heap", "performance"]
-categories = ["allocator"]
+categories = ["memory-management", "api-bindings"]
 description = "Sys crate wrapping the mimalloc allocator"
 license = "MIT"
 links = "mimalloc"
