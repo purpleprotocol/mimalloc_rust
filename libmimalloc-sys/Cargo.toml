@@ -11,10 +11,10 @@ license = "MIT"
 links = "mimalloc"
 
 [dependencies]
-cty = { version = "0.2", optional = true }
+cty = { version = "0.2.1", optional = true }
 
 [build-dependencies]
-cmake = "0.1"
+cmake = "0.1.45"
 
 [features]
 secure = []

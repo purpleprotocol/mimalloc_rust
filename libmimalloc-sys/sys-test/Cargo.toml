@@ -9,7 +9,7 @@ publish = false
 
 [dependencies]
 libmimalloc-sys = { path = "..", features = ["extended"] }
-libc = "0.2"
+libc = "0.2.85"
 
 [build-dependencies]
-ctest = "0.2"
+ctest = "0.2.22"

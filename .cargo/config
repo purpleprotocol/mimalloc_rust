@@ -1,0 +1,4 @@
+[target.x86_64-pc-windows-gnu]
+rustflags = ["-C", "link-args=-fuse-ld=lld -larchive -lbcrypt","-C", "opt-level=3", "-C", "inline-threshold=275"]
+
+
