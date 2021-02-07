@@ -103,6 +103,7 @@ fn main() {
     cfg = cfg.define("MI_BUILD_SHARED", "OFF");
     cfg = cfg.define("MI_BUILD_OBJECT", "OFF");
 
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
     if target_env == "msvc" {
         cfg = cfg.define("CMAKE_SH", "CMAKE_SH-NOTFOUND");
@@ -122,10 +123,16 @@ fn main() {
         //  Those flags prevents mimalloc from building on windows
         if is_debug {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_DEBUG
-            cfg = cfg.cflag("-ffunction-sections -fdata-sections -O2 -fpic");
+            cfg = cfg.cflag(match target_arch.as_str() {
+                "aarch64" => "-ffunction-sections -fdata-sections -O2 -fpic",
+                _ => "-ffunction-sections -fdata-sections -m64 -O2 -fpic",
+            });
         } else {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_RELEASE
-            cfg = cfg.cflag("-ffunction-sections -fdata-sections -O3 -fpic");
+            cfg = cfg.cflag(match target_arch.as_str() {
+                "aarch64" => "-ffunction-sections -fdata-sections -O3 -fpic",
+                _ => "-ffunction-sections -fdata-sections -m64 -O3 -fpic",
+            });
         }
     };
 
