@@ -122,10 +122,10 @@ fn main() {
         //  Those flags prevents mimalloc from building on windows
         if is_debug {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_DEBUG
-            cfg = cfg.cflag("-ffunction-sections -fdata-sections -m64 -O2 -fpic");
+            cfg = cfg.cflag("-ffunction-sections -fdata-sections -O2 -fpic");
         } else {
             // CMAKE_C_FLAGS + CMAKE_C_FLAGS_RELEASE
-            cfg = cfg.cflag("-ffunction-sections -fdata-sections -m64 -O3 -fpic");
+            cfg = cfg.cflag("-ffunction-sections -fdata-sections -O3 -fpic");
         }
     };
 
