@@ -16,7 +16,7 @@ static GLOBAL: MiMalloc = MiMalloc;
 
 ## Requirements
 
-A __C__ compiler are required for building [mimalloc](https://github.com/microsoft/mimalloc) with cargo.
+A __C__ compiler is required for building [mimalloc](https://github.com/microsoft/mimalloc) with cargo.
 
 ## Usage without secure mode
 
