@@ -1,5 +1,7 @@
 // Copyright 2019 Octavian Oncescu
 
+#![no_std]
+
 use core::ffi::c_void;
 
 #[cfg(feature = "extended")]
