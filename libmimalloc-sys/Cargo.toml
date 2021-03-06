@@ -14,7 +14,7 @@ links = "mimalloc"
 cty = { version = "0.2", optional = true }
 
 [build-dependencies]
-cmake = "0.1"
+cc = "1.0"
 
 [features]
 secure = []
