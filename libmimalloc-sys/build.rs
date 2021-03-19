@@ -3,27 +3,73 @@ use std::env;
 fn main() {
     let mut build = cc::Build::new();
 
-    build.include("c_src/mimalloc/include");
-    build.files(
-        [
-            "alloc-aligned",
-            "alloc-posix",
-            "alloc",
-            "arena",
-            "bitmap",
-            "heap",
-            "init",
-            "options",
-            "os",
-            "page",
-            "random",
-            "region",
-            "segment",
-            "stats",
-        ]
-        .iter()
-        .map(|fname| format!("c_src/mimalloc/src/{}.c", fname)),
-    );
+    if cfg!(feature = "v1_dev") {
+        build.include("c_src/mimalloc_dev/include");
+        build.files(
+            [
+                "alloc-aligned",
+                "alloc-posix",
+                "alloc",
+                "arena",
+                "bitmap",
+                "heap",
+                "init",
+                "options",
+                "os",
+                "page",
+                "random",
+                "region",
+                "segment",
+                "stats",
+            ]
+            .iter()
+            .map(|fname| format!("c_src/mimalloc_dev/src/{}.c", fname)),
+        );
+    } else if cfg!(feature = "v2_dev") {
+        build.include("c_src/mimalloc_dev_slice/include");
+        build.files(
+            [
+                "alloc-aligned",
+                "alloc-posix",
+                "alloc",
+                "arena",
+                "bitmap",
+                "heap",
+                "init",
+                "options",
+                "os",
+                "page",
+                "random",
+                "segment-cache",
+                "segment",
+                "stats",
+            ]
+            .iter()
+            .map(|fname| format!("c_src/mimalloc_dev_slice/src/{}.c", fname)),
+        );
+    } else {
+        build.include("c_src/mimalloc/include");
+        build.files(
+            [
+                "alloc-aligned",
+                "alloc-posix",
+                "alloc",
+                "arena",
+                "bitmap",
+                "heap",
+                "init",
+                "options",
+                "os",
+                "page",
+                "random",
+                "region",
+                "segment",
+                "stats",
+            ]
+            .iter()
+            .map(|fname| format!("c_src/mimalloc/src/{}.c", fname)),
+        );
+    }
 
     build.define("MI_STATIC_LIB", None);
 
