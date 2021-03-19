@@ -28,6 +28,7 @@ fn main() {
     build.define("MI_STATIC_LIB", None);
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os not defined!");
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").expect("target_env not defined!");
 
     if cfg!(feature = "override") {
         // Overriding malloc is only available on windows in shared mode, but we
@@ -61,4 +62,7 @@ fn main() {
     }
 
     build.compile("mimalloc");
+    if (target_os == "windows") && (target_env == "gnu") {
+        println!("cargo:rustc-link-lib=bcrypt");
+    }
 }
