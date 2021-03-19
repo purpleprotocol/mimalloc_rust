@@ -3,31 +3,78 @@ use std::env;
 fn main() {
     let mut build = cc::Build::new();
 
-    build.include("c_src/mimalloc/include");
-    build.files(
-        [
-            "alloc-aligned",
-            "alloc-posix",
-            "alloc",
-            "arena",
-            "bitmap",
-            "heap",
-            "init",
-            "options",
-            "os",
-            "page",
-            "random",
-            "region",
-            "segment",
-            "stats",
-        ]
-        .iter()
-        .map(|fname| format!("c_src/mimalloc/src/{}.c", fname)),
-    );
+    if cfg!(feature = "v1_dev") {
+        build.include("c_src/mimalloc_dev/include");
+        build.files(
+            [
+                "alloc-aligned",
+                "alloc-posix",
+                "alloc",
+                "arena",
+                "bitmap",
+                "heap",
+                "init",
+                "options",
+                "os",
+                "page",
+                "random",
+                "region",
+                "segment",
+                "stats",
+            ]
+            .iter()
+            .map(|fname| format!("c_src/mimalloc_dev/src/{}.c", fname)),
+        );
+    } else if cfg!(feature = "v2_dev") {
+        build.include("c_src/mimalloc_dev_slice/include");
+        build.files(
+            [
+                "alloc-aligned",
+                "alloc-posix",
+                "alloc",
+                "arena",
+                "bitmap",
+                "heap",
+                "init",
+                "options",
+                "os",
+                "page",
+                "random",
+                "segment-cache",
+                "segment",
+                "stats",
+            ]
+            .iter()
+            .map(|fname| format!("c_src/mimalloc_dev_slice/src/{}.c", fname)),
+        );
+    } else {
+        build.include("c_src/mimalloc/include");
+        build.files(
+            [
+                "alloc-aligned",
+                "alloc-posix",
+                "alloc",
+                "arena",
+                "bitmap",
+                "heap",
+                "init",
+                "options",
+                "os",
+                "page",
+                "random",
+                "region",
+                "segment",
+                "stats",
+            ]
+            .iter()
+            .map(|fname| format!("c_src/mimalloc/src/{}.c", fname)),
+        );
+    }
 
     build.define("MI_STATIC_LIB", None);
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os not defined!");
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").expect("target_env not defined!");
 
     if cfg!(feature = "override") {
         // Overriding malloc is only available on windows in shared mode, but we
@@ -61,4 +108,7 @@ fn main() {
     }
 
     build.compile("mimalloc");
+    if (target_os == "windows") && (target_env == "gnu") {
+        println!("cargo:rustc-link-lib=bcrypt");
+    }
 }

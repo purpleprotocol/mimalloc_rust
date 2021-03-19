@@ -21,6 +21,10 @@ secure = []
 override = []
 extended = ["cty"]
 local_dynamic_tls = []
+v1_stable = []
+v1_dev = []
+v2_dev = []
+
 
 # Show `extended` on docs.rs since it's the full API surface.
 [package.metadata.docs.rs]
