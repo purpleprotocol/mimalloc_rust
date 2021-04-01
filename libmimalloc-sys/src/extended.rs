@@ -138,6 +138,51 @@ extern "C" {
         offset: usize,
     ) -> *mut c_void;
 
+    /// Zero initialized [re-allocation](crate::mi_realloc).
+    ///
+    /// In general, only valid on memory originally allocated by zero
+    /// initialization: [`mi_calloc`](crate::mi_calloc),
+    /// [`mi_zalloc`](crate::mi_zalloc),
+    /// [`mi_zalloc_aligned`](crate::mi_zalloc_aligned), ...
+    pub fn mi_rezalloc(p: *mut c_void, newsize: usize) -> *mut c_void;
+
+    /// Zero initialized [re-allocation](crate::mi_realloc), following `calloc`
+    /// paramater conventions.
+    ///
+    /// In general, only valid on memory originally allocated by zero
+    /// initialization: [`mi_calloc`](crate::mi_calloc),
+    /// [`mi_zalloc`](crate::mi_zalloc),
+    /// [`mi_zalloc_aligned`](crate::mi_zalloc_aligned), ...
+    pub fn mi_recalloc(p: *mut c_void, newcount: usize, size: usize) -> *mut c_void;
+
+    /// Aligned version of [`mi_rezalloc`].
+    pub fn mi_rezalloc_aligned(p: *mut c_void, newsize: usize, alignment: usize) -> *mut c_void;
+
+    /// Offset-aligned version of [`mi_rezalloc`].
+    pub fn mi_rezalloc_aligned_at(
+        p: *mut c_void,
+        newsize: usize,
+        alignment: usize,
+        offset: usize,
+    ) -> *mut c_void;
+
+    /// Aligned version of [`mi_recalloc`].
+    pub fn mi_recalloc_aligned(
+        p: *mut c_void,
+        newcount: usize,
+        size: usize,
+        alignment: usize,
+    ) -> *mut c_void;
+
+    /// Offset-aligned version of [`mi_recalloc`].
+    pub fn mi_recalloc_aligned_at(
+        p: *mut c_void,
+        newcount: usize,
+        size: usize,
+        alignment: usize,
+        offset: usize,
+    ) -> *mut c_void;
+
     /// Allocate an object of no more than [`MI_SMALL_SIZE_MAX`] bytes.
     ///
     /// Does not check that `size` is indeed small.
@@ -178,6 +223,67 @@ extern "C" {
     /// allocates a lot of blocks that are freed by other threads it may improve
     /// resource usage by calling this every once in a while.
     pub fn mi_collect(force: bool);
+
+    /// Checked free: If `p` came from mimalloc's heap (as decided by
+    /// [`mi_is_in_heap_region`]), this is [`mi_free(p)`](crate::mi_free), but
+    /// otherwise it is a no-op.
+    pub fn mi_cfree(p: *mut c_void);
+
+    /// Returns true if this is a pointer into a memory region that has been
+    /// reserved by the mimalloc heap.
+    ///
+    /// This function is described by the mimalloc documentation as "relatively
+    /// fast".
+    ///
+    /// See also [`mi_heap_check_owned`], which is (much) slower and slightly
+    /// more precise, but only concerns a single `mi_heap`.
+    pub fn mi_is_in_heap_region(p: *const c_void) -> bool;
+
+    /// Layout-aware deallocation: Like [`mi_free`](crate::mi_free), but accepts
+    /// the size and alignment as well.
+    ///
+    /// Note: unlike some allocators that require this information for
+    /// performance, mimalloc doesn't need it (as of the current version,
+    /// v2.0.0), and so it currently implements this as a (debug) assertion that
+    /// verifies that `p` is actually aligned to `alignment` and is usable for
+    /// at least `size` bytes, before delegating to `mi_free`.
+    ///
+    /// However, currently there's no way to have this crate enable mimalloc's
+    /// debug assertions, so these checks aren't particularly useful.
+    ///
+    /// Note: It's legal to pass null to this function, and you are not required
+    /// to use this to deallocate memory from an aligned allocation function.
+    pub fn mi_free_size_aligned(p: *mut c_void, size: usize, alignment: usize);
+
+    /// Size-aware deallocation: Like [`mi_free`](crate::mi_free), but accepts
+    /// the size and alignment as well.
+    ///
+    /// Note: unlike some allocators that require this information for
+    /// performance, mimalloc doesn't need it (as of the current version,
+    /// v2.0.0), and so it currently implements this as a (debug) assertion that
+    /// verifies that `p` is actually aligned to `alignment` and is usable for
+    /// at least `size` bytes, before delegating to `mi_free`.
+    ///
+    /// However, currently there's no way to have this crate enable mimalloc's
+    /// debug assertions, so these checks aren't particularly useful.
+    ///
+    /// Note: It's legal to pass null to this function.
+    pub fn mi_free_size(p: *mut c_void, size: usize);
+
+    /// Alignment-aware deallocation: Like [`mi_free`](crate::mi_free), but
+    /// accepts the size and alignment as well.
+    ///
+    /// Note: unlike some allocators that require this information for
+    /// performance, mimalloc doesn't need it (as of the current version,
+    /// v2.0.0), and so it currently implements this as a (debug) assertion that
+    /// verifies that `p` is actually aligned to `alignment` and is usable for
+    /// at least `size` bytes, before delegating to `mi_free`.
+    ///
+    /// However, currently there's no way to have this crate enable mimalloc's
+    /// debug assertions, so these checks aren't particularly useful.
+    ///
+    /// Note: It's legal to pass null to this function.
+    pub fn mi_free_aligned(p: *mut c_void, alignment: usize);
 
     /// Print the main statistics.
     ///
@@ -221,6 +327,35 @@ extern "C" {
     /// Should not be used on most systems, as it's called by thread_init or the
     /// process loader.
     pub fn mi_process_init();
+
+    /// Return process information (time and memory usage). All parameters are
+    /// optional (nullable) out-params:
+    ///
+    /// | Parameter        | Description |
+    /// | :-               | :- |
+    /// | `elapsed_msecs`  | Elapsed wall-clock time of the process in milli-seconds. |
+    /// | `user_msecs`     | User time in milli-seconds (as the sum over all threads). |
+    /// | `system_msecs`   | System time in milli-seconds. |
+    /// | `current_rss`    | Current working set size (touched pages). |
+    /// | `peak_rss`       | Peak working set size (touched pages). |
+    /// | `current_commit` | Current committed memory (backed by the page file). |
+    /// | `peak_commit`    | Peak committed memory (backed by the page file). |
+    /// | `page_faults`    | Count of hard page faults. |
+    ///
+    /// The `current_rss` is precise on Windows and MacOSX; other systems
+    /// estimate this using `current_commit`. The `commit` is precise on Windows
+    /// but estimated on other systems as the amount of read/write accessible
+    /// memory reserved by mimalloc.
+    pub fn mi_process_info(
+        elapsed_msecs: *mut usize,
+        user_msecs: *mut usize,
+        system_msecs: *mut usize,
+        current_rss: *mut usize,
+        peak_rss: *mut usize,
+        current_commit: *mut usize,
+        peak_commit: *mut usize,
+        page_faults: *mut usize,
+    );
 
     /// Uninitialize mimalloc on a thread.
     ///
@@ -424,6 +559,9 @@ pub const mi_option_os_tag: mi_option_t = 17;
 
 /// Experimental
 pub const mi_option_max_errors: mi_option_t = 18;
+
+/// Experimental
+pub const mi_option_max_warnings: mi_option_t = 19;
 
 extern "C" {
     // Note: mi_option_{enable,disable} aren't exposed because they're redundant
@@ -721,6 +859,59 @@ extern "C" {
         offset: usize,
     ) -> *mut c_void;
 
+    /// Equivalent to [`mi_rezalloc`], but allocates out of the specific heap
+    /// instead of the default.
+    pub fn mi_heap_rezalloc(heap: *mut mi_heap_t, p: *mut c_void, newsize: usize) -> *mut c_void;
+
+    /// Equivalent to [`mi_recalloc`], but allocates out of the specific heap
+    /// instead of the default.
+    pub fn mi_heap_recalloc(
+        heap: *mut mi_heap_t,
+        p: *mut c_void,
+        newcount: usize,
+        size: usize,
+    ) -> *mut c_void;
+
+    /// Equivalent to [`mi_rezalloc_aligned`], but allocates out of the specific
+    /// heap instead of the default.
+    pub fn mi_heap_rezalloc_aligned(
+        heap: *mut mi_heap_t,
+        p: *mut c_void,
+        newsize: usize,
+        alignment: usize,
+    ) -> *mut c_void;
+
+    /// Equivalent to [`mi_rezalloc_aligned_at`], but allocates out of the
+    /// specific heap instead of the default.
+    pub fn mi_heap_rezalloc_aligned_at(
+        heap: *mut mi_heap_t,
+        p: *mut c_void,
+        newsize: usize,
+        alignment: usize,
+        offset: usize,
+    ) -> *mut c_void;
+
+    /// Equivalent to [`mi_recalloc_aligned`], but allocates out of the
+    /// specific heap instead of the default.
+    pub fn mi_heap_recalloc_aligned(
+        heap: *mut mi_heap_t,
+        p: *mut c_void,
+        newcount: usize,
+        size: usize,
+        alignment: usize,
+    ) -> *mut c_void;
+
+    /// Equivalent to [`mi_recalloc_aligned_at`], but allocates out of the
+    /// specific heap instead of the default.
+    pub fn mi_heap_recalloc_aligned_at(
+        heap: *mut mi_heap_t,
+        p: *mut c_void,
+        newcount: usize,
+        size: usize,
+        alignment: usize,
+        offset: usize,
+    ) -> *mut c_void;
+
     /// Does a heap contain a pointer to a previously allocated block?
     ///
     /// `p` must be a pointer to a previously allocated block (in any heap) -- it cannot be some
@@ -739,7 +930,8 @@ extern "C" {
     ///
     /// Note: expensive function, linear in the pages in the heap.
     ///
-    /// See [`mi_heap_contains_block`], [`mi_heap_get_default`]
+    /// See [`mi_heap_contains_block`], [`mi_heap_get_default`], and
+    /// [`mi_is_in_heap_region`]
     pub fn mi_heap_check_owned(heap: *mut mi_heap_t, p: *const c_void) -> bool;
 
     /// Check safely if any pointer is part of the default heap of this thread.

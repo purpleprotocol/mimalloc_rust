@@ -4,48 +4,27 @@ fn main() {
     let mut build = cc::Build::new();
 
     build.include("c_src/mimalloc/include");
-    build.files(
-        [
-            "alloc-aligned",
-            "alloc-posix",
-            "alloc",
-            "arena",
-            "bitmap",
-            "heap",
-            "init",
-            "options",
-            "os",
-            "page",
-            "random",
-            "region",
-            "segment",
-            "stats",
-        ]
-        .iter()
-        .map(|fname| format!("c_src/mimalloc/src/{}.c", fname)),
-    );
-
-    build.define("MI_STATIC_LIB", None);
+    build.include("c_src/mimalloc/src");
+    build.file("c_src/mimalloc/src/static.c");
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os not defined!");
+    let target_family = env::var("CARGO_CFG_TARGET_FAMILY").expect("target_family not defined!");
 
-    if cfg!(feature = "override") {
+    if env::var_os("CARGO_FEATURE_OVERRIDE").is_some() {
         // Overriding malloc is only available on windows in shared mode, but we
         // only ever build a static lib.
-        if target_os != "windows" {
+        if target_family != "windows" {
             build.define("MI_MALLOC_OVERRIDE", None);
         }
     }
 
-    if cfg!(feature = "secure") {
+    if env::var_os("CARGO_FEATURE_SECURE").is_some() {
         build.define("MI_SECURE", "4");
     }
 
-    let dynamic_tls = cfg!(feature = "local_dynamic_tls");
+    let dynamic_tls = env::var("CARGO_FEATURE_LOCAL_DYNAMIC_TLS").is_ok();
 
-    if env::var("CARGO_CFG_TARGET_FAMILY").expect("target family not set") == "unix"
-        && target_os != "haiku"
-    {
+    if target_family == "unix" && target_os != "haiku" {
         if dynamic_tls {
             build.flag_if_supported("-ftls-model=local-dynamic");
         } else {
