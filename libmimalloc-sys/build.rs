@@ -18,9 +18,11 @@ fn main() {
         }
     }
 
-    if env::var_os("CARGO_FEATURE_SECURE").is_some() {
+    // if env::var_os("CARGO_FEATURE_SECURE").is_some() {
         build.define("MI_SECURE", "4");
-    }
+    //}
+
+    build.debug(true);
 
     let dynamic_tls = env::var("CARGO_FEATURE_LOCAL_DYNAMIC_TLS").is_ok();
 
@@ -33,7 +35,8 @@ fn main() {
     }
 
     // Remove heavy debug assertions etc
-    build.define("MI_DEBUG", "0");
+    build.define("MI_DEBUG", "3");
+    build.define("MI_SHOW_ERRORS", "1");
 
     if build.get_compiler().is_like_msvc() {
         build.cpp(true);
