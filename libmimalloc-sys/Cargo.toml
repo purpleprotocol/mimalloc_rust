@@ -18,6 +18,7 @@ cc = "1.0"
 
 [features]
 secure = []
+debug = []
 override = []
 extended = ["cty"]
 local_dynamic_tls = []
