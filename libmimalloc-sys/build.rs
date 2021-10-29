@@ -32,8 +32,13 @@ fn main() {
         }
     }
 
-    // Remove heavy debug assertions etc
-    build.define("MI_DEBUG", "0");
+    if env::var_os("CARGO_FEATURE_DEBUG").is_some() {
+        build.define("MI_DEBUG", "3");
+        build.define("MI_SHOW_ERRORS", "1");
+    } else {
+        // Remove heavy debug assertions etc
+        build.define("MI_DEBUG", "0");
+    }
 
     if build.get_compiler().is_like_msvc() {
         build.cpp(true);
