@@ -32,7 +32,9 @@ fn main() {
         }
     }
 
-    if env::var_os("CARGO_FEATURE_DEBUG").is_some() {
+    if env::var_os("CARGO_FEATURE_DEBUG").is_some()
+        || (env::var_os("CARGO_FEATURE_DEBUG_IN_DEBUG").is_some() && cfg!(debug_assertions))
+    {
         build.define("MI_DEBUG", "3");
         build.define("MI_SHOW_ERRORS", "1");
     } else {
