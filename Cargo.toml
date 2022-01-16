@@ -30,3 +30,11 @@ override = ["libmimalloc-sys/override"]
 debug = ["libmimalloc-sys/debug"]
 debug_in_debug = ["libmimalloc-sys/debug_in_debug"]
 local_dynamic_tls = ["libmimalloc-sys/local_dynamic_tls"]
+
+# Allow to select different mimalloc branch
+v1_dev = ["libmimalloc-sys/v1_dev"] # v1 dev branch
+v2_dev = ["libmimalloc-sys/v2_dev"] # v2 dev-slice branch
+# Trigger git submodule update to have the latest upstream commit to be used
+# This will be for all submodules, master, dev and dev-slice
+# Since mimalloc isn't fully ABI stable at the moment, it could cause issues.
+submodule_update = ["libmimalloc-sys/submodule_update"]

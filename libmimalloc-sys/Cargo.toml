@@ -24,6 +24,14 @@ override = []
 extended = ["cty"]
 local_dynamic_tls = []
 
+# Allow to select different mimalloc branch
+v1_dev = [] # v1 dev branch
+v2_dev = [] # v2 dev-slice branch
+# Trigger git submodule update to have the latest upstream commit to be used
+# This will be for all submodules, master, dev and dev-slice
+# Since mimalloc isn't fully ABI stable at the moment, it could cause issues.
+submodule_update = []
+
 # Show `extended` on docs.rs since it's the full API surface.
 [package.metadata.docs.rs]
 features = ["extended"]

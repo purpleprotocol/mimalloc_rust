@@ -1,11 +1,37 @@
 use std::env;
+use std::process::Command;
 
 fn main() {
+    // Update the submodule's if the `submodule_update` feature is enabled.
+    // This ensures the latests commits are used to build this package.
+    // Since mimalloc isn't fully ABI stable at the moment, it could cause issues.
+    if cfg!(feature = "submodule_update") {
+        // Init or update the submodule with libui if needed
+        Command::new("git")
+            .args(&["version"])
+            .status()
+            .expect("Git does not appear to be installed. Error");
+        Command::new("git")
+            .args(&["submodule", "update", "--init", "--recursive", "--remote"])
+            .status()
+            .expect("Unable to update mimalloc submodule branches. Error");
+    }
+
     let mut build = cc::Build::new();
 
-    build.include("c_src/mimalloc/include");
-    build.include("c_src/mimalloc/src");
-    build.file("c_src/mimalloc/src/static.c");
+    if cfg!(feature = "v1_dev") {
+        build.include("c_src/mimalloc_dev/include");
+        build.include("c_src/mimalloc_dev/src");
+        build.file("c_src/mimalloc_dev/src/static.c");
+    } else if cfg!(feature = "v2_dev") {
+        build.include("c_src/mimalloc_dev_slice/include");
+        build.include("c_src/mimalloc_dev_slice/src");
+        build.file("c_src/mimalloc_dev_slice/src/static.c");
+    } else {
+        build.include("c_src/mimalloc/include");
+        build.include("c_src/mimalloc/src");
+        build.file("c_src/mimalloc/src/static.c");
+    }
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os not defined!");
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").expect("target_family not defined!");
