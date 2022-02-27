@@ -1,4 +1,4 @@
-#![allow(bad_style, clippy::all)]
+#![allow(bad_style, deprecated, clippy::all)]
 
 use libmimalloc_sys::*;
 

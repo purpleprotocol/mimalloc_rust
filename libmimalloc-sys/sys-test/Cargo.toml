@@ -12,4 +12,4 @@ libmimalloc-sys = { path = "..", features = ["extended"] }
 libc = "0.2"
 
 [build-dependencies]
-ctest = "0.2"
+ctest2 = "0.4"
