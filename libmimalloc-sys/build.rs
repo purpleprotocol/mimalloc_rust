@@ -7,8 +7,8 @@ fn main() {
     build.include("c_src/mimalloc/src");
     build.file("c_src/mimalloc/src/static.c");
 
-    let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os not defined!");
-    let target_family = env::var("CARGO_CFG_TARGET_FAMILY").expect("target_family not defined!");
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_else(|_| String::new());
+    let target_family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_else(|_| String::new());
 
     if env::var_os("CARGO_FEATURE_OVERRIDE").is_some() {
         // Overriding malloc is only available on windows in shared mode, but we
