@@ -1,5 +1,5 @@
 fn main() {
-    let mut cfg = ctest::TestGenerator::new();
+    let mut cfg = ctest2::TestGenerator::new();
     cfg.header("mimalloc.h")
         .include(concat!(
             env!("CARGO_MANIFEST_DIR"),
