@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -44,7 +44,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-default-features
+
+      - name: Test libmimalloc-sys crate bindings (secure)
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: -p libmimalloc-sys-test
 
       - name: Build (no secure)
         uses: actions-rs/cargo@v1
@@ -58,18 +63,18 @@ jobs:
           command: test
           args: --no-default-features
 
-      - name: Test libmimalloc-sys crate bindings.
+      - name: Test libmimalloc-sys crate bindings (no secure)
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: -p libmimalloc-sys-test
+          args: --no-default-features -p libmimalloc-sys-test
 
   lint:
     name: Rustfmt / Clippy
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -97,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
