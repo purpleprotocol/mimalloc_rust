@@ -12,6 +12,7 @@ links = "mimalloc"
 
 [dependencies]
 cty = { version = "0.2", optional = true }
+libc = "0.2"
 
 [build-dependencies]
 cc = "1.0"

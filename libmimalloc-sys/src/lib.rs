@@ -3,6 +3,8 @@
 
 use core::ffi::c_void;
 
+extern crate libc;
+
 #[cfg(feature = "extended")]
 mod extended;
 #[cfg(feature = "extended")]
