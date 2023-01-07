@@ -1,6 +1,6 @@
 [package]
 name = "libmimalloc-sys"
-version = "0.1.29"
+version = "0.1.30"
 authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/purpleprotocol/mimalloc_rust/tree/master/libmimalloc-sys"
