@@ -25,7 +25,7 @@ randomized allocation, encrypted free lists, etc. The performance penalty is usu
 around 10% according to [mimalloc](https://github.com/microsoft/mimalloc)
 own benchmarks.
 
-To disable secure mode, put in `Cargo.toml`:
+To enable secure mode, put in `Cargo.toml`:
 
 ```ini
 [dependencies]
