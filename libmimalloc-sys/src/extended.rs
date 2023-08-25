@@ -479,15 +479,6 @@ pub const mi_option_show_stats: mi_option_t = 1;
 pub const mi_option_verbose: mi_option_t = 2;
 
 /// ### The following options are experimental
-/// ### Deprecated options are kept for binary backward compatibility with v1.x versions
-
-/// Option (experimental) Eagerly commit segments (4MiB) (enabled by default).
-pub const mi_option_eager_commit: mi_option_t = 3;
-
-/// Option Deprecated
-pub const mi_option_deprecated_eager_region_commit: mi_option_t = 4;
-/// Option Deprecated
-pub const mi_option_deprecated_reset_decommits: mi_option_t = 5;
 
 /// Option (experimental) Use large OS pages (2MiB in size) if possible.
 ///
@@ -524,32 +515,8 @@ pub const mi_option_reserve_huge_os_pages_at: mi_option_t = 8;
 /// Option (experimental) Reserve specified amount of OS memory at startup, e.g. "1g" or "512m".
 pub const mi_option_reserve_os_memory: mi_option_t = 9;
 
-/// Option Deprecated
-pub const mi_option_deprecated_segment_cache: mi_option_t = 10;
-
-/// Option (experimental) Reset page memory after a mi_option_reset_delay milliseconds when it becomes free.
-///
-/// By default, mimalloc will reset (or purge) OS pages that are not in use, to signal to the OS
-/// that the underlying physical memory can be reused. This can reduce memory fragmentation in
-/// long running (server) programs. By setting it to 0 this will no longer be done which can improve
-/// performance for batch-like programs. As an alternative, the mi_option_reset_delay= can be set
-/// higher (100ms by default) to make the page reset occur less frequently instead of turning it
-/// off completely.
-///
-/// Default: 1 (true)
-pub const mi_option_page_reset: mi_option_t = 11;
-
-/// Option (experimental)
-pub const mi_option_abandoned_page_decommit: mi_option_t = 12;
-
-// Option (experimental)
-pub const mi_option_deprecated_segment_reset: mi_option_t = 13;
-
 /// Option (experimental) the first N segments per thread are not eagerly committed (=1).
 pub const mi_option_eager_commit_delay: mi_option_t = 14;
-
-/// Option (experimental) Decommit page memory after N milli-seconds delay (25ms).
-pub const mi_option_decommit_delay: mi_option_t = 15;
 
 /// Option (experimental) Pretend there are at most N NUMA nodes; Use 0 to use the actual detected NUMA nodes at runtime.
 pub const mi_option_use_numa_nodes: mi_option_t = 16;
@@ -568,15 +535,6 @@ pub const mi_option_max_warnings: mi_option_t = 20;
 
 /// Option (experimental)
 pub const mi_option_max_segment_reclaim: mi_option_t = 21;
-
-/// Option (experimental) Enable decommitting memory (=on)
-pub const mi_option_allow_decommit: mi_option_t = 22;
-
-/// Option (experimental) Decommit large segment memory after N milli-seconds delay (500ms).
-pub const mi_option_segment_decommit_delay: mi_option_t = 23;
-
-/// Option (experimental)
-pub const mi_option_decommit_extend_delay: mi_option_t = 24;
 
 /// Last option.
 pub const _mi_option_last: mi_option_t = 26;
@@ -988,21 +946,6 @@ extern "C" {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn runtime_option_decommit() {
-        unsafe {
-            // decommit slices when no longer used (after decommit_delay milli-seconds) (default 1)
-            assert_eq!(mi_option_get(mi_option_allow_decommit), 1);
-            mi_option_set(mi_option_allow_decommit, 0);
-            assert_eq!(mi_option_get(mi_option_allow_decommit), 0);
-
-            // page decommit delay in milli-seconds (default 25)
-            assert_eq!(mi_option_get(mi_option_decommit_delay), 25);
-            mi_option_set(mi_option_decommit_delay, 100);
-            assert_eq!(mi_option_get(mi_option_decommit_delay), 100);
-        }
-    }
 
     #[test]
     fn runtime_stable_option() {
