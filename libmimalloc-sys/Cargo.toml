@@ -9,6 +9,14 @@ categories = ["memory-management", "api-bindings"]
 description = "Sys crate wrapping the mimalloc allocator"
 license = "MIT"
 links = "mimalloc"
+exclude = [
+    "/c_src/mimalloc/bin",
+    "/c_src/mimalloc/cmake",
+    "/c_src/mimalloc/doc",
+    "/c_src/mimalloc/docs",
+    "/c_src/mimalloc/ide",
+    "/c_src/mimalloc/test",
+]
 
 [dependencies]
 cty = { version = "0.2", optional = true }
