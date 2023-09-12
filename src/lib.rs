@@ -29,33 +29,6 @@ use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::c_void;
 use ffi::*;
 
-// `MI_MAX_ALIGN_SIZE` is 16 unless manually overridden:
-// https://github.com/microsoft/mimalloc/blob/15220c68/include/mimalloc-types.h#L22
-//
-// If it changes on us, we should consider either manually overriding it, or
-// expose it from the -sys crate (in order to catch updates)
-const MI_MAX_ALIGN_SIZE: usize = 16;
-
-// Note: this doesn't take a layout directly because doing so would be wrong for
-// reallocation
-#[inline]
-fn may_use_unaligned_api(size: usize, alignment: usize) -> bool {
-    // Required by `GlobalAlloc`. Note that while allocators aren't allowed to
-    // unwind in rust, this is only in debug mode, and can only happen if the
-    // caller already caused UB by passing in an invalid layout.
-    debug_assert!(size != 0 && alignment.is_power_of_two());
-
-    // This logic is based on the discussion [here]. We don't bother with the
-    // 3rd suggested test due to it being high cost (calling `mi_good_size`)
-    // compared to the other checks, and also feeling like it relies on too much
-    // implementation-specific behavior.
-    //
-    // [here]: https://github.com/microsoft/mimalloc/issues/314#issuecomment-708541845
-
-    (alignment <= MI_MAX_ALIGN_SIZE && size >= alignment)
-        || (alignment == size && alignment <= 4096)
-}
-
 /// Drop-in mimalloc global allocator.
 ///
 /// ## Usage
@@ -70,20 +43,12 @@ pub struct MiMalloc;
 unsafe impl GlobalAlloc for MiMalloc {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        if may_use_unaligned_api(layout.size(), layout.align()) {
-            mi_malloc(layout.size()) as *mut u8
-        } else {
-            mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
-        }
+        mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
     }
 
     #[inline]
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        if may_use_unaligned_api(layout.size(), layout.align()) {
-            mi_zalloc(layout.size()) as *mut u8
-        } else {
-            mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
-        }
+        mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
     }
 
     #[inline]
@@ -93,11 +58,7 @@ unsafe impl GlobalAlloc for MiMalloc {
 
     #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        if may_use_unaligned_api(new_size, layout.align()) {
-            mi_realloc(ptr as *mut c_void, new_size) as *mut u8
-        } else {
-            mi_realloc_aligned(ptr as *mut c_void, new_size, layout.align()) as *mut u8
-        }
+        mi_realloc_aligned(ptr as *mut c_void, new_size, layout.align()) as *mut u8
     }
 }
 
