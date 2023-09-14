@@ -34,22 +34,22 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
 
       - name: Build (secure)
-        run: cargo build
+        run: cargo build --features secure
 
       - name: Test (secure)
-        run: cargo test
+        run: cargo test --features secure
 
       - name: Test libmimalloc-sys crate bindings (secure)
-        run: cargo run -p libmimalloc-sys-test
+        run: cargo run --features secure -p libmimalloc-sys-test
 
       - name: Build (no secure)
-        run: cargo build --no-default-features
+        run: cargo build
 
       - name: Test (no secure)
-        run: cargo test --no-default-features
+        run: cargo test
 
       - name: Test libmimalloc-sys crate bindings (no secure)
-        run: cargo run --no-default-features -p libmimalloc-sys-test
+        run: cargo run -p libmimalloc-sys-test
 
   lint:
     name: Rustfmt / Clippy
