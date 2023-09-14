@@ -29,45 +29,27 @@ jobs:
           submodules: recursive
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-          profile: minimal
-          default: true
 
       - name: Build (secure)
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
+        run: cargo build
 
       - name: Test (secure)
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test
 
       - name: Test libmimalloc-sys crate bindings (secure)
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: -p libmimalloc-sys-test
+        run: cargo run -p libmimalloc-sys-test
 
       - name: Build (no secure)
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --no-default-features
+        run: cargo build --no-default-features
 
       - name: Test (no secure)
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features
+        run: cargo test --no-default-features
 
       - name: Test libmimalloc-sys crate bindings (no secure)
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --no-default-features -p libmimalloc-sys-test
+        run: cargo run --no-default-features -p libmimalloc-sys-test
 
   lint:
     name: Rustfmt / Clippy
@@ -78,23 +60,15 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
           components: rustfmt, clippy
 
       - name: Fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
 
       - name: Clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --workspace -- -D warnings
+        run: cargo clippy --workspace -- -D warnings
 
   # Detect cases where documentation links would be dead
   doc:
@@ -106,11 +80,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
+      - uses: dtolnay/rust-toolchain@nightly
 
       # Note: We need to use nightly rust, and `cargo rustdoc` (yes, not `cargo
       # doc`) to actually get it to respect -D warnings... Using nightly also
@@ -118,13 +88,7 @@ jobs:
       # what docs.rs uses.
 
       - name: 'Check documentation links in `mimalloc`'
-        uses: actions-rs/cargo@v1
-        with:
-          command: rustdoc
-          args: -- -D warnings
+        run: cargo rustdoc -- -D warnings
 
       - name: 'Check documentation links in `libmimalloc-sys`'
-        uses: actions-rs/cargo@v1
-        with:
-          command: rustdoc
-          args: -p libmimalloc-sys -- -D warnings
+        run: cargo rustdoc -p libmimalloc-sys -- -D warnings
