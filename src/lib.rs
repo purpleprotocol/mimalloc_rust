@@ -6,7 +6,7 @@
 //! Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
 //!
 //! ## Usage
-//! ```rust,ignore
+//! ```rust
 //! use mimalloc::MiMalloc;
 //!
 //! #[global_allocator]
@@ -18,7 +18,7 @@
 //! heap allocations are encrypted, but this results in a 3% increase in overhead.
 //!
 //! To disable secure mode, in `Cargo.toml`:
-//! ```rust,ignore
+//! ```toml
 //! [dependencies]
 //! mimalloc = { version = "*", default-features = false }
 //! ```
@@ -32,7 +32,7 @@ use ffi::*;
 /// Drop-in mimalloc global allocator.
 ///
 /// ## Usage
-/// ```rust,ignore
+/// ```rust
 /// use mimalloc::MiMalloc;
 ///
 /// #[global_allocator]
