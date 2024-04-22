@@ -31,6 +31,7 @@ debug = []
 debug_in_debug = []
 override = []
 extended = ["cty"]
+arena = []
 local_dynamic_tls = []
 
 # Show `extended` on docs.rs since it's the full API surface.

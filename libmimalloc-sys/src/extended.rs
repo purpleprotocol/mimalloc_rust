@@ -465,6 +465,7 @@ pub type mi_error_fun = Option<unsafe extern "C" fn(code: c_int, arg: *mut c_voi
 /// Runtime options. All options are false by default.
 pub type mi_option_t = c_int;
 
+#[cfg(feature = "arena")]
 /// Arena Id
 pub type mi_arena_id_t = c_int;
 
@@ -945,9 +946,11 @@ extern "C" {
         arg: *mut c_void,
     ) -> bool;
 
+    #[cfg(feature = "arena")]
     /// Create a heap that only allocates in the specified arena
     pub fn mi_heap_new_in_arena(arena_id: mi_arena_id_t) -> *mut mi_heap_t;
 
+    #[cfg(feature = "arena")]
     /// Reserve OS memory for use by mimalloc. Reserved areas are used
     /// before allocating from the OS again. By reserving a large area upfront,
     /// allocation can be more efficient, and can be better managed on systems
@@ -968,6 +971,7 @@ extern "C" {
         arena_id: *mut mi_arena_id_t,
     ) -> c_int;
 
+    #[cfg(feature = "arena")]
     /// Manage a particular memory area for use by mimalloc.
     /// This is just like `mi_reserve_os_memory_ex` except that the area should already be
     /// allocated in some manner and available for use my mimalloc.
