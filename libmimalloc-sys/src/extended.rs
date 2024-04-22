@@ -465,6 +465,9 @@ pub type mi_error_fun = Option<unsafe extern "C" fn(code: c_int, arg: *mut c_voi
 /// Runtime options. All options are false by default.
 pub type mi_option_t = c_int;
 
+/// Arena Id
+pub type mi_arena_id_t = c_int;
+
 // Note: mimalloc doc website seems to have the order of show_stats and
 // show_errors reversed as of 1.6.3, however what I have here is correct:
 // https://github.com/microsoft/mimalloc/issues/266#issuecomment-653822341
@@ -940,6 +943,60 @@ extern "C" {
         visit_all_blocks: bool,
         visitor: mi_block_visit_fun,
         arg: *mut c_void,
+    ) -> bool;
+
+    /// Create a heap that only allocates in the specified arena
+    pub fn mi_heap_new_in_arena(arena_id: mi_arena_id_t) -> *mut mi_heap_t;
+
+    /// Reserve OS memory for use by mimalloc. Reserved areas are used
+    /// before allocating from the OS again. By reserving a large area upfront,
+    /// allocation can be more efficient, and can be better managed on systems
+    /// without `mmap`/`VirtualAlloc` (like WASM for example).
+    ///
+    /// - `size` The size to reserve.
+    /// - `commit` Commit the memory upfront.
+    /// - `allow_large` Allow large OS pages (2MiB) to be used?
+    /// - `exclusive` Only allow allocations if specifically for this arena.
+    /// - `arena_id` Pointer who's value will be set to the new arena_id if successful.
+    ///
+    /// Returns 0 if successful, and an error code otherwise (e.g. `ENOMEM`)
+    pub fn mi_reserve_os_memory_ex(
+        size: usize,
+        commit: bool,
+        allow_large: bool,
+        exclusive: bool,
+        arena_id: *mut mi_arena_id_t,
+    ) -> c_int;
+
+    /// Manage a particular memory area for use by mimalloc.
+    /// This is just like `mi_reserve_os_memory_ex` except that the area should already be
+    /// allocated in some manner and available for use my mimalloc.
+    ///
+    /// # Safety
+    /// mimalloc will likely segfault when allocating from the arena if the arena `start` & `size`
+    /// aren't aligned with mimalloc's `MI_SEGMENT_ALIGN` (e.g. 32MB on x86_64 machines).
+    ///
+    /// - `start` Start of the memory area
+    /// - `size` The size of the memory area. Must be large than `MI_ARENA_BLOCK_SIZE` (e.g. 64MB
+    ///          on x86_64 machines).
+    /// - `commit` Set true if the memory range is already commited.
+    /// - `is_large` Set true if the memory range consists of large files, or if the memory should
+    ///              not be decommitted or protected (like rdma etc.).
+    /// - `is_zero` Set true if the memory range consists only of zeros.
+    /// - `numa_node` Possible associated numa node or `-1`.
+    /// - `exclusive` Only allow allocations if specifically for this arena.
+    /// - `arena_id` Pointer who's value will be set to the new arena_id if successful.
+    ///
+    /// Returns `true` if arena was successfully allocated
+    pub fn mi_manage_os_memory_ex(
+        start: *const c_void,
+        size: usize,
+        is_committed: bool,
+        is_large: bool,
+        is_zero: bool,
+        numa_node: c_int,
+        exclusive: bool,
+        arena_id: *mut mi_arena_id_t,
     ) -> bool;
 }
 
