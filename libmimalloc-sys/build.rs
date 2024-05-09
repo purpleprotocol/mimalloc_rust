@@ -32,6 +32,12 @@ fn main() {
         }
     }
 
+    if (target_os == "linux" || target_os == "android")
+        && env::var_os("CARGO_FEATURE_NO_THP").is_some()
+    {
+        build.define("MI_NO_THP", "1");
+    }
+
     if env::var_os("CARGO_FEATURE_DEBUG").is_some()
         || (env::var_os("CARGO_FEATURE_DEBUG_IN_DEBUG").is_some() && cfg!(debug_assertions))
     {
