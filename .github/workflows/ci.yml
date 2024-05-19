@@ -50,6 +50,15 @@ jobs:
 
       - name: Test libmimalloc-sys crate bindings (no secure)
         run: cargo run -p libmimalloc-sys-test
+        
+      - name: Build (extended)
+        run: cargo build --features extended
+
+      - name: Test (extended)
+        run: cargo test --features extended
+
+      - name: Test libmimalloc-sys crate bindings (extended)
+        run: cargo run --features extended -p libmimalloc-sys-test
 
   lint:
     name: Rustfmt / Clippy
