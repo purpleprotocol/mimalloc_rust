@@ -65,11 +65,6 @@ extern "C" {
     ///
     /// The pointer `p` must have been allocated before (or be null).
     pub fn mi_free(p: *mut c_void);
-
-    /// Return the available bytes in a memory block.
-    ///
-    /// The returned size can be used to call `mi_expand` successfully.
-    pub fn mi_usable_size(p: *const c_void) -> usize;
 }
 
 #[cfg(test)]
