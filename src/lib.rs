@@ -13,17 +13,22 @@
 //! static GLOBAL: MiMalloc = MiMalloc;
 //! ```
 //!
-//! ## Usage without secure mode
-//! By default this library builds mimalloc in secure mode. This means that
-//! heap allocations are encrypted, but this results in a 3% increase in overhead.
+//! ## Usage with secure mode
+//! Using secure mode adds guard pages,
+//! randomized allocation, encrypted free lists, etc. The performance penalty is usually
+//! around 10% according to [mimalloc's](https://github.com/microsoft/mimalloc)
+//! own benchmarks.
 //!
-//! To disable secure mode, in `Cargo.toml`:
+//! To enable secure mode, put in `Cargo.toml`:
 //! ```rust,ignore
 //! [dependencies]
-//! mimalloc = { version = "*", default-features = false }
+//! mimalloc = { version = "*", features = ["secure"] }
 //! ```
 
 extern crate libmimalloc_sys as ffi;
+
+#[cfg(feature = "extended")]
+mod extended;
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::c_void;
