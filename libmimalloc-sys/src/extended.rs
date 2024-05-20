@@ -202,6 +202,11 @@ extern "C" {
     /// know for certain.
     pub fn mi_zalloc_small(size: usize) -> *mut c_void;
 
+    /// Return the available bytes in a memory block.
+    ///
+    /// The returned size can be used to call `mi_expand` successfully.
+    pub fn mi_usable_size(p: *const c_void) -> usize;
+
     /// Return the used allocation size.
     ///
     /// Returns the size `n` that will be allocated, where `n >= size`.

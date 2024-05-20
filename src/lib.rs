@@ -67,17 +67,6 @@ unsafe impl GlobalAlloc for MiMalloc {
     }
 }
 
-impl MiMalloc {
-    /// Return the amount of available bytes in a memory block.
-    ///
-    /// # Safety
-    /// `ptr` must point to a memory block allocated by mimalloc, or be null.
-    #[inline]
-    pub unsafe fn usable_size(&self, ptr: *const u8) -> usize {
-        mi_usable_size(ptr as *const c_void)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -147,19 +136,6 @@ mod tests {
             let ptr = alloc.alloc(layout);
             let ptr = alloc.realloc(ptr, layout, 2 << 20);
             alloc.dealloc(ptr, layout);
-        }
-    }
-
-    #[test]
-    fn it_checks_usable_size() {
-        unsafe {
-            let layout = Layout::from_size_align(8, 8).unwrap();
-            let alloc = MiMalloc;
-
-            let ptr = alloc.alloc(layout);
-            let usable_size = alloc.usable_size(ptr);
-            alloc.dealloc(ptr, layout);
-            assert!(usable_size >= 8);
         }
     }
 }
