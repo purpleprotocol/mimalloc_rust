@@ -1014,6 +1014,16 @@ mod tests {
     use super::*;
 
     #[test]
+    fn it_calculates_usable_size() {
+        let ptr = unsafe { mi_malloc(32) } as *mut u8;
+        let usable_size = unsafe { mi_usable_size(ptr as *mut c_void) };
+        assert!(
+            usable_size >= 32,
+            "usable_size should at least equal to the allocated size"
+        );
+    }
+
+    #[test]
     fn runtime_stable_option() {
         unsafe {
             assert_eq!(mi_option_get(mi_option_show_errors), 0);

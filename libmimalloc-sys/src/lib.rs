@@ -89,14 +89,4 @@ mod tests {
         let ptr = unsafe { mi_realloc_aligned(ptr as *mut c_void, 8, 8) } as *mut u8;
         unsafe { mi_free(ptr as *mut c_void) };
     }
-
-    #[test]
-    fn it_calculates_usable_size() {
-        let ptr = unsafe { mi_malloc(32) } as *mut u8;
-        let usable_size = unsafe { mi_usable_size(ptr as *mut c_void) };
-        assert!(
-            usable_size >= 32,
-            "usable_size should at least equal to the allocated size"
-        );
-    }
 }
