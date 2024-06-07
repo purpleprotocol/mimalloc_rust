@@ -57,6 +57,6 @@ fn main() {
 
     // on armv6 we need to link with libatomic
     if target_os == "linux" && target_arch == "arm" {
-        println!("cargo:rustc-link-lib=dylib=atomic");
+        println!("cargo:rustc-link-lib=atomic");
     }
 }
