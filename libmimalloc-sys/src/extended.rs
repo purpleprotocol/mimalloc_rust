@@ -546,7 +546,7 @@ pub const mi_option_max_warnings: mi_option_t = 20;
 pub const mi_option_max_segment_reclaim: mi_option_t = 21;
 
 /// Last option.
-pub const _mi_option_last: mi_option_t = 28;
+pub const _mi_option_last: mi_option_t = 29;
 
 extern "C" {
     // Note: mi_option_{enable,disable} aren't exposed because they're redundant
