@@ -57,6 +57,10 @@ fn main() {
 
     // on armv6 we need to link with libatomic
     if target_os == "linux" && target_arch == "arm" {
-        println!("cargo:rustc-link-lib=atomic");
+        // Embrace the atomic capability library across various platforms.
+        // For instance, on certain platforms, llvm has relocated the atomic of the arm32 architecture to libclang_rt.builtins.a
+        // while some use libatomic.a, and others use libatomic_ops.a.
+        let atomic_name = env::var("DEP_ATOMIC").unwrap_or("atomic".to_owned());
+        println!("cargo:rustc-link-lib={}", atomic_name);
     }
 }
