@@ -546,7 +546,7 @@ pub const mi_option_max_warnings: mi_option_t = 20;
 pub const mi_option_max_segment_reclaim: mi_option_t = 21;
 
 /// Last option.
-pub const _mi_option_last: mi_option_t = 29;
+pub const _mi_option_last: mi_option_t = 37;
 
 extern "C" {
     // Note: mi_option_{enable,disable} aren't exposed because they're redundant
@@ -657,6 +657,8 @@ pub struct mi_heap_area_t {
     pub block_size: usize,
     /// Size in bytes of a full block including padding and metadata.
     pub full_block_size: usize,
+    /// Heap tag associated with this area
+    pub heap_tag: i32,
 }
 
 /// Visitor function passed to [`mi_heap_visit_blocks`]
