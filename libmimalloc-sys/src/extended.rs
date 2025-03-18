@@ -488,7 +488,7 @@ pub const mi_option_show_stats: mi_option_t = 1;
 pub const mi_option_verbose: mi_option_t = 2;
 
 /// ### The following options are experimental
-
+///
 /// Option (experimental) Use large OS pages (2MiB in size) if possible.
 ///
 /// Use large OS pages (2MiB) when available; for some workloads this can
