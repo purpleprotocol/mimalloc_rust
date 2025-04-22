@@ -63,4 +63,14 @@ fn main() {
         let atomic_name = env::var("DEP_ATOMIC").unwrap_or("atomic".to_owned());
         println!("cargo:rustc-link-lib={}", atomic_name);
     }
+
+    // Link with libs needed on Windows
+    if target_os == "windows" {
+        // https://github.com/microsoft/mimalloc/blob/af21001f7a65eafb8fb16460b018ebf9d75e2ad8/CMakeLists.txt#L487
+        let libs = ["psapi", "shell32", "user32", "advapi32", "bcrypt"];
+
+        for lib in libs {
+            println!("cargo:rustc-link-lib={}", lib);
+        }
+    }
 }
