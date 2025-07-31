@@ -1,9 +1,17 @@
+use std::env;
+
 fn main() {
+    let cargo_manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let version = if env::var("CARGO_FEATURE_V3").is_ok() {
+        "v3"
+    } else {
+        "v2"
+    };
+
     let mut cfg = ctest2::TestGenerator::new();
     cfg.header("mimalloc.h")
-        .include(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../c_src/mimalloc/include"
+        .include(format!(
+            "{cargo_manifest_dir}/../c_src/mimalloc/{version}/include"
         ))
         .cfg("feature", Some("extended"))
         .fn_cname(|rust, link_name| link_name.unwrap_or(rust).to_string())

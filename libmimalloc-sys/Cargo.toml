@@ -34,6 +34,7 @@ extended = ["cty"]
 arena = []
 local_dynamic_tls = []
 no_thp = []
+v3 = []
 
 # Show `extended` on docs.rs since it's the full API surface.
 [package.metadata.docs.rs]
