@@ -14,7 +14,7 @@ fn main() {
             "{cargo_manifest_dir}/../c_src/mimalloc/{version}/include"
         ))
         .cfg("feature", Some("extended"))
-        .cfg("feature", (version == "v3").then(|| "v3"))
+        .cfg("feature", (version == "v3").then_some("v3"))
         .fn_cname(|rust, link_name| link_name.unwrap_or(rust).to_string())
         // ignore whether or not the option enum is signed.
         .skip_signededness(|c| c.ends_with("_t") || c.ends_with("_e"))
