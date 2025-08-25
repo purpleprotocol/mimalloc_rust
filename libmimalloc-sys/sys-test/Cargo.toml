@@ -13,3 +13,6 @@ libc = "0.2"
 
 [build-dependencies]
 ctest2 = "0.4"
+
+[features]
+v3 = ["libmimalloc-sys/v3"]
