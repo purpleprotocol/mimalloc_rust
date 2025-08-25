@@ -40,7 +40,7 @@ jobs:
         run: cargo test --features secure
 
       - name: Test libmimalloc-sys crate bindings (secure)
-        run: cargo run --features secure -p libmimalloc-sys-test
+        run: cargo run --features libmimalloc-sys-test/secure -p libmimalloc-sys-test
 
       - name: Build (no secure)
         run: cargo build
@@ -58,7 +58,7 @@ jobs:
         run: cargo test --features extended
 
       - name: Test libmimalloc-sys crate bindings (extended)
-        run: cargo run --features extended -p libmimalloc-sys-test
+        run: cargo run --features libmimalloc-sys-test/extended -p libmimalloc-sys-test
 
       - name: Build (v3, secure)
         run: cargo build --features v3,secure
@@ -67,7 +67,7 @@ jobs:
         run: cargo test --features v3,secure
 
       - name: Test libmimalloc-sys crate bindings (v3, secure)
-        run: cargo run --features v3,secure -p libmimalloc-sys-test
+        run: cargo run --features libmimalloc-sys-test/v3,libmimalloc-sys-test/secure -p libmimalloc-sys-test
 
       - name: Build (v3, no secure)
         run: cargo build --features v3
@@ -76,7 +76,7 @@ jobs:
         run: cargo test --features v3
 
       - name: Test libmimalloc-sys crate bindings (v3, no secure)
-        run: cargo run --features v3 -p libmimalloc-sys-test
+        run: cargo run --features libmimalloc-sys-test/v3 -p libmimalloc-sys-test
 
       - name: Build (v3, extended)
         run: cargo build --features v3,extended
@@ -85,7 +85,7 @@ jobs:
         run: cargo test --features v3,extended
 
       - name: Test libmimalloc-sys crate bindings (v3, extended)
-        run: cargo run --features v3,extended -p libmimalloc-sys-test
+        run: cargo run --features libmimalloc-sys-test/v3,libmimalloc-sys-test/extended -p libmimalloc-sys-test
 
   lint:
     name: Rustfmt / Clippy
