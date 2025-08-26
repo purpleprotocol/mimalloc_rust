@@ -34,7 +34,7 @@ mimalloc = { version = "*", features = ["secure"] }
 
 ## Usage with v3
 
-By default this library uses `mimalloc v2`.
+By default this library uses mimalloc `v2`.
 To enable `v3`, put in `Cargo.toml`:
 
 ```ini
