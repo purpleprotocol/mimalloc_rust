@@ -8,8 +8,13 @@ license = "MIT"
 publish = false
 
 [dependencies]
-libmimalloc-sys = { path = "..", features = ["extended"] }
+libmimalloc-sys = { path = ".." }
 libc = "0.2"
 
 [build-dependencies]
 ctest2 = "0.4"
+
+[features]
+secure = ["libmimalloc-sys/secure"]
+extended = ["libmimalloc-sys/extended"]
+v3 = ["libmimalloc-sys/v3"]

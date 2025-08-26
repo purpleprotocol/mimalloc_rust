@@ -10,12 +10,18 @@ description = "Sys crate wrapping the mimalloc allocator"
 license = "MIT"
 links = "mimalloc"
 exclude = [
-    "/c_src/mimalloc/bin",
-    "/c_src/mimalloc/cmake",
-    "/c_src/mimalloc/doc",
-    "/c_src/mimalloc/docs",
-    "/c_src/mimalloc/ide",
-    "/c_src/mimalloc/test",
+    "/c_src/mimalloc/v2/bin",
+    "/c_src/mimalloc/v2/cmake",
+    "/c_src/mimalloc/v2/doc",
+    "/c_src/mimalloc/v2/docs",
+    "/c_src/mimalloc/v2/ide",
+    "/c_src/mimalloc/v2/test",
+    "/c_src/mimalloc/v3/bin",
+    "/c_src/mimalloc/v3/cmake",
+    "/c_src/mimalloc/v3/doc",
+    "/c_src/mimalloc/v3/docs",
+    "/c_src/mimalloc/v3/ide",
+    "/c_src/mimalloc/v3/test",
 ]
 
 [dependencies]
@@ -34,6 +40,7 @@ extended = ["cty"]
 arena = []
 local_dynamic_tls = []
 no_thp = []
+v3 = []
 
 # Show `extended` on docs.rs since it's the full API surface.
 [package.metadata.docs.rs]

@@ -1,11 +1,31 @@
+use std::env;
+
 fn main() {
+    let cargo_manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let secure = if env::var("CARGO_FEATURE_SECURE").is_ok() {
+        Some("secure")
+    } else {
+        None
+    };
+    let extended = if env::var("CARGO_FEATURE_EXTENDED").is_ok() {
+        Some("extended")
+    } else {
+        None
+    };
+    let version = if env::var("CARGO_FEATURE_V3").is_ok() {
+        "v3"
+    } else {
+        "v2"
+    };
+
     let mut cfg = ctest2::TestGenerator::new();
     cfg.header("mimalloc.h")
-        .include(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../c_src/mimalloc/include"
+        .include(format!(
+            "{cargo_manifest_dir}/../c_src/mimalloc/{version}/include"
         ))
-        .cfg("feature", Some("extended"))
+        .cfg("feature", secure)
+        .cfg("feature", extended)
+        .cfg("feature", (version == "v3").then_some("v3"))
         .fn_cname(|rust, link_name| link_name.unwrap_or(rust).to_string())
         // ignore whether or not the option enum is signed.
         .skip_signededness(|c| c.ends_with("_t") || c.ends_with("_e"))
