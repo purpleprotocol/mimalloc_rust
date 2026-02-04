@@ -10,7 +10,7 @@ mod extended;
 #[cfg(feature = "extended")]
 pub use extended::*;
 
-extern "C" {
+unsafe extern "C" {
     /// Allocate zero-initialized `size` bytes.
     ///
     /// Returns a pointer to newly allocated zero-initialized memory, or null if
