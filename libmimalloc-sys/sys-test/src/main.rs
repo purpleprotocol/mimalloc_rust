@@ -1,4 +1,10 @@
-#![allow(bad_style, unused_imports, unused_macros, clippy::all)]
+#![allow(
+	bad_style,
+	unused_imports,
+	unused_macros,
+	function_casts_as_integer,
+	clippy::all
+)]
 
 use libmimalloc_sys::*;
 

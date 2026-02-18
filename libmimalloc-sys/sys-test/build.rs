@@ -1,7 +1,8 @@
-use std::env;
+use std::{env, fs, path::PathBuf};
 
 fn main() {
     let cargo_manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR is set by cargo"));
     let secure = if env::var("CARGO_FEATURE_SECURE").is_ok() {
         Some("secure")
     } else {
@@ -55,5 +56,10 @@ fn main() {
             }
         });
 
-    cfg.generate("../src/lib.rs", "all.rs");
+    let source = fs::read_to_string("../src/lib.rs").expect("read libmimalloc-sys/src/lib.rs");
+    let ctest_source = source.replace("unsafe extern \"C\"", "extern \"C\"");
+    let ctest_input = out_dir.join("ctest-input.rs");
+    fs::write(&ctest_input, ctest_source).expect("write generated ctest input");
+
+    cfg.generate(ctest_input, "all.rs");
 }
