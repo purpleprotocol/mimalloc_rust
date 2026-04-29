@@ -447,6 +447,12 @@ extern "C" {
     ///
     /// Note: This function is thread safe.
     pub fn mi_register_error(out: mi_error_fun, arg: *mut c_void);
+
+    /// Get the statistics for the current subprocess aggregated over all its heaps as JSON.
+    ///
+    /// Returns pointer to the buffer or NULL on failure. Use mi_free() to free the buffer if the buf parameter was NULL.
+    #[cfg(not(feature = "v2"))]
+    pub fn mi_stats_get_json(buf_size: usize, buf: *mut c_char) -> *mut c_char;
 }
 
 /// An output callback. Must be thread-safe.
@@ -1092,7 +1098,7 @@ mod tests {
 
     #[test]
     fn it_calculates_usable_size() {
-        let ptr = unsafe { mi_malloc(32) } as *mut u8;
+        let ptr = unsafe { crate::mi_malloc(32) } as *mut u8;
         let usable_size = unsafe { mi_usable_size(ptr as *mut c_void) };
         assert!(
             usable_size >= 32,
