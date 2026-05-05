@@ -5,22 +5,6 @@ module(name = "mimalloc_rust")
 ####################
 
 bazel_dep(name = "rules_rust", version = "0.70.0")
-bazel_dep(name = "toolchains_llvm")
-
-git_override(
-  module_name = "toolchains_llvm",
-  commit = "6dcd045ef37b96da7e61c83f441c2e27ecf6e55f",
-  remote = "https://github.com/bazel-contrib/toolchains_llvm",
-)
-
-#######################
-# Configure C toolchain
-#######################
-
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain(llvm_version = "22.1.4")
-use_repo(llvm, "llvm_toolchain")
-register_toolchains("@llvm_toolchain//:all")
 
 ##########################
 # Configure Rust toolchain
@@ -38,7 +22,6 @@ register_toolchains("@rust_toolchains//:all")
 crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
 crate.from_cargo(
     name = "crates",
-    cargo_lockfile = "//:Cargo.lock",
     manifests = ["//:Cargo.toml"],
 )
 use_repo(crate, "crates")
