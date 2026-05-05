@@ -5,14 +5,31 @@ module(name = "mimalloc_rust")
 ####################
 
 bazel_dep(name = "rules_rust", version = "0.70.0")
+bazel_dep(name = "toolchains_llvm", dev_dependency = True)
+
+git_override(
+  module_name = "toolchains_llvm",
+  commit = "6dcd045ef37b96da7e61c83f441c2e27ecf6e55f",
+  remote = "https://github.com/bazel-contrib/toolchains_llvm",
+)
+
+#######################
+# Configure C toolchain
+#######################
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm", dev_dependency = True)
+llvm.toolchain(llvm_version = "22.1.4")
+use_repo(llvm, "llvm_toolchain")
+register_toolchains("@llvm_toolchain//:all", dev_dependency = True)
 
 ##########################
 # Configure Rust toolchain
 ##########################
 
-rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust", dev_dependency = True)
+rust.toolchain()
 use_repo(rust, "rust_toolchains")
-register_toolchains("@rust_toolchains//:all")
+register_toolchains("@rust_toolchains//:all", dev_dependency = True)
 
 ##################
 # Configure Crates
