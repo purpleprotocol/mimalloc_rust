@@ -1,0 +1,30 @@
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+load("@crates//:defs.bzl", "aliases", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+filegroup(
+    name = "mimalloc_srcs",
+    srcs = glob([
+        "c_src/mimalloc/v2/**/*.c",
+        "c_src/mimalloc/v2/**/*.h",
+        "c_src/mimalloc/v3/**/*.c",
+        "c_src/mimalloc/v3/**/*.h",
+    ]),
+)
+
+cargo_build_script(
+    name = "mimalloc_sys_build",
+    srcs = ["build.rs"],
+    data = [":mimalloc_srcs"],
+    deps = all_crate_deps(build = True),
+)
+
+rust_library(
+    name = "libmimalloc_sys",
+    visibility = ["//:__pkg__"],
+    srcs = [
+        "src/lib.rs",
+        "src/extended.rs",
+    ],
+    deps = all_crate_deps(normal = True) + [":mimalloc_sys_build"],
+)

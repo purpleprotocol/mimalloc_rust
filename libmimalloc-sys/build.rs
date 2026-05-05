@@ -11,20 +11,22 @@ fn main() {
     };
 
     let cargo_manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
-    let include_dir = Path::new(&cargo_manifest_dir)
-        .join("c_src/mimalloc/")
-        .join(version)
-        .join("include")
-        .to_str()
-        .expect("include path is not valid UTF-8")
-        .to_string();
+    let mimalloc_dir = Path::new(&cargo_manifest_dir).join("c_src/mimalloc").join(version);
+    let include_dir = mimalloc_dir.join("include");
+    let src_dir = mimalloc_dir.join("src");
+    let static_c = src_dir.join("static.c");
     // Make the include directory available to consumers via the `DEP_MIMALLOC_INCLUDE_DIR`
     // environment variable.
-    println!("cargo:INCLUDE_DIR={include_dir}");
+    println!(
+        "cargo:INCLUDE_DIR={}",
+        include_dir
+            .to_str()
+            .expect("include path is not valid UTF-8")
+    );
 
-    build.include(format!("c_src/mimalloc/{version}/include"));
-    build.include(format!("c_src/mimalloc/{version}/src"));
-    build.file(format!("c_src/mimalloc/{version}/src/static.c"));
+    build.include(&include_dir);
+    build.include(&src_dir);
+    build.file(&static_c);
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os not defined!");
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").expect("target_family not defined!");

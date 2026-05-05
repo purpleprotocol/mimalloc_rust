@@ -1,0 +1,12 @@
+load("@crates//:defs.bzl", "aliases", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+rust_library(
+    name = "mimalloc",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "src/lib.rs",
+        "src/extended.rs",
+    ],
+    deps = all_crate_deps(normal = True) + ["//libmimalloc-sys:libmimalloc_sys",],
+)
