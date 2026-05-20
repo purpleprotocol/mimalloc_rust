@@ -560,7 +560,7 @@ pub const mi_option_max_segment_reclaim: mi_option_t = 21;
 #[cfg(feature = "v2")]
 pub const _mi_option_last: mi_option_t = 38;
 #[cfg(not(feature = "v2"))]
-pub const _mi_option_last: mi_option_t = 46;
+pub const _mi_option_last: mi_option_t = 47;
 
 extern "C" {
     // Note: mi_option_{enable,disable} aren't exposed because they're redundant
