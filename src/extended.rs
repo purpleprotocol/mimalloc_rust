@@ -20,27 +20,46 @@ impl MiMalloc {
         ffi::mi_usable_size(ptr as *const c_void)
     }
 
-    /// Call the given function with a string version of the JSON stats for the whole process
+    /// Extract a string containing the JSON statistics for the whole process
     ///
     /// Allocates (using mimalloc itself) to store the JSON structure.
     #[cfg(not(feature = "v2"))]
-    pub fn with_stats_json<F, O>(f: F) -> Result<O, &'static str>
-    where
-        F: FnOnce(&str) -> O,
-    {
+    pub fn stats_json() -> Result<StatsJson, &'static str> {
         unsafe {
             let buf = ffi::mi_stats_get_json(0, core::ptr::null::<c_char>() as *mut _);
-            if buf.is_null() {
-                return Err("failed to call mi_stats_get_json");
+            if let Some(inner) = core::ptr::NonNull::new(buf) {
+                Ok(StatsJson { inner })
+            } else {
+                Err("failed to call mi_stats_get_json")
             }
-            let cstr = CStr::from_ptr(buf);
-            let slice = cstr
-                .to_str()
-                .map_err(|_| "mi_stats_get_json contained invalid UTF-8")?;
-            let o = f(slice);
-            ffi::mi_free(buf as _);
-            Ok(o)
         }
+    }
+}
+
+#[cfg(not(feature = "v2"))]
+/// Wrapper around the output of `MiMalloc::stats_json()`
+///
+/// Derefs to a CStr
+pub struct StatsJson {
+    inner: core::ptr::NonNull<c_char>,
+}
+
+#[cfg(not(feature = "v2"))]
+impl core::ops::Deref for StatsJson {
+    type Target = CStr;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe {
+            let cstr = CStr::from_ptr(self.inner.as_ptr());
+            &cstr
+        }
+    }
+}
+
+#[cfg(not(feature = "v2"))]
+impl Drop for StatsJson {
+    fn drop(&mut self) {
+        unsafe { ffi::mi_free(self.inner.as_ptr() as _) }
     }
 }
 
@@ -71,9 +90,10 @@ mod test {
 
     #[test]
     #[cfg(not(feature = "v2"))]
-    fn test_with_stats_json() {
-        let (first_char, len) = MiMalloc::with_stats_json(|f| (f.chars().next(), f.len())).unwrap();
-        assert_eq!(first_char, Some('{'));
-        assert!(len > 1);
+    fn test_stats_json() {
+        let stats = MiMalloc::stats_json().expect("should get stats");
+        let slice = stats.to_str().expect("should be valid UTF-8");
+        assert_eq!(slice.chars().next(), Some('{'));
+        assert!(stats.count_bytes() > 1);
     }
 }
