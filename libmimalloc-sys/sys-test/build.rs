@@ -55,5 +55,11 @@ fn main() {
             }
         });
 
+    if version == "v3" {
+        cfg.header("mimalloc-stats.h").include(format!(
+            "{cargo_manifest_dir}/../c_src/mimalloc/{version}/include"
+        ));
+    }
+
     cfg.generate("../src/lib.rs", "all.rs");
 }

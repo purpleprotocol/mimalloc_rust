@@ -447,6 +447,12 @@ extern "C" {
     ///
     /// Note: This function is thread safe.
     pub fn mi_register_error(out: mi_error_fun, arg: *mut c_void);
+
+    /// Get the statistics for the current subprocess aggregated over all its heaps as JSON.
+    ///
+    /// Returns pointer to the buffer or NULL on failure. Use mi_free() to free the buffer if the buf parameter was NULL.
+    #[cfg(not(feature = "v2"))]
+    pub fn mi_stats_get_json(buf_size: usize, buf: *mut c_char) -> *mut c_char;
 }
 
 /// An output callback. Must be thread-safe.
@@ -1088,6 +1094,7 @@ extern "C" {
 
 #[cfg(test)]
 mod tests {
+    use super::super::mi_malloc;
     use super::*;
 
     #[test]
