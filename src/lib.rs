@@ -20,7 +20,7 @@
 //! own benchmarks.
 //!
 //! To enable secure mode, put in `Cargo.toml`:
-//! ```rust,ignore
+//! ```toml
 //! [dependencies]
 //! mimalloc = { version = "*", features = ["secure"] }
 //! ```

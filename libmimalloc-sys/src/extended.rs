@@ -1094,11 +1094,12 @@ extern "C" {
 
 #[cfg(test)]
 mod tests {
+    use super::super::mi_malloc;
     use super::*;
 
     #[test]
     fn it_calculates_usable_size() {
-        let ptr = unsafe { crate::mi_malloc(32) } as *mut u8;
+        let ptr = unsafe { mi_malloc(32) } as *mut u8;
         let usable_size = unsafe { mi_usable_size(ptr as *mut c_void) };
         assert!(
             usable_size >= 32,
