@@ -31,7 +31,7 @@ cty = { version = "0.2", optional = true }
 libc = "0.2"
 
 [build-dependencies]
-cc = "1.0"
+cc = "1.2"
 
 [features]
 secure = []
@@ -41,6 +41,7 @@ override = []
 extended = ["cty"]
 arena = []
 local_dynamic_tls = []
+win_direct_tls = []
 no_thp = []
 v2 = []
 
