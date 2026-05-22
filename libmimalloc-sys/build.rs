@@ -96,18 +96,6 @@ fn main() {
         }
     }
 
-    if target_arch == "aarch64" {
-        if compiler.is_like_msvc() {
-            if compiler.is_like_clang() {
-                build.flag_if_supported("-march=armv8.1-a");
-            } else {
-                build.flag_if_supported("/arch:armv8.1");
-            }
-        } else {
-            build.flag_if_supported("-march=armv8.1-a");
-        }
-    }
-
     if (target_os == "linux" || target_os == "android")
         && env::var_os("CARGO_FEATURE_NO_THP").is_some()
     {
