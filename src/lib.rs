@@ -1,6 +1,8 @@
 // Copyright 2019 Octavian Oncescu
 
 #![no_std]
+#![cfg_attr(feature = "nightly_allocator_api", feature(allocator_api))]
+#![cfg_attr(feature = "nightly_allocator_api", feature(ptr_metadata))]
 
 //! A drop-in global allocator wrapper around the [mimalloc](https://github.com/microsoft/mimalloc) allocator.
 //! Mimalloc is a general purpose, performance oriented allocator built by Microsoft.
@@ -29,6 +31,9 @@ extern crate libmimalloc_sys as ffi;
 
 #[cfg(feature = "extended")]
 mod extended;
+
+#[cfg(feature = "nightly_allocator_api")]
+mod nightly_allocator_api;
 
 use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::c_void;
