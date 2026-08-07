@@ -50,15 +50,36 @@ use ffi::*;
 /// ```
 pub struct MiMalloc;
 
+/// The minimum alignment that mimalloc's default allocation functions
+/// (`mi_malloc` / `mi_zalloc`) guarantee for every block, regardless of the
+/// requested `Layout::align()`.
+///
+/// This mirrors mimalloc's `MI_MAX_ALIGN_SIZE` constant (`sizeof(max_align_t)`,
+/// 16 bytes on most platforms), despite the "MAX" in its C name actually
+/// denoting a guaranteed *minimum* alignment.
+const MIN_MIMALLOC_ALIGNMENT: usize = 16;
+
+/// The alignment threshold below which mimalloc's `realloc` internally
+/// falls back to the unaligned reallocation path.
+///
+/// Corresponds to mimalloc's internal check
+/// `alignment <= sizeof(uintptr_t)` inside
+/// `mi_theap_realloc_zero_aligned_at`, which delegates to
+/// `_mi_theap_realloc_zero` when the alignment does not exceed the size of
+/// a pointer (8 bytes on 64-bit platforms, 4 on 32-bit).
+///
+/// Note this differs from [`MIN_MIMALLOC_ALIGNMENT`], which is 16: mimalloc
+/// does not use the same threshold for `realloc` as it does for `malloc`.
+const MIN_REALLOC_ALIGNMENT: usize = size_of::<usize>();
+
 unsafe impl GlobalAlloc for MiMalloc {
     #[inline]
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
-    }
-
-    #[inline]
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
+        if layout.align() <= MIN_MIMALLOC_ALIGNMENT {
+            mi_malloc(layout.size()) as *mut u8
+        } else {
+            mi_malloc_aligned(layout.size(), layout.align()) as *mut u8
+        }
     }
 
     #[inline]
@@ -67,8 +88,21 @@ unsafe impl GlobalAlloc for MiMalloc {
     }
 
     #[inline]
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        if layout.align() <= MIN_MIMALLOC_ALIGNMENT {
+            mi_zalloc(layout.size()) as *mut u8
+        } else {
+            mi_zalloc_aligned(layout.size(), layout.align()) as *mut u8
+        }
+    }
+
+    #[inline]
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        mi_realloc_aligned(ptr as *mut c_void, new_size, layout.align()) as *mut u8
+        if layout.align() <= MIN_REALLOC_ALIGNMENT {
+            mi_realloc(ptr as *mut c_void, new_size) as *mut u8
+        } else {
+            mi_realloc_aligned(ptr as *mut c_void, new_size, layout.align()) as *mut u8
+        }
     }
 }
 
@@ -78,69 +112,57 @@ mod tests {
 
     #[test]
     fn it_frees_allocated_memory() {
-        unsafe {
-            let layout = Layout::from_size_align(8, 8).unwrap();
-            let alloc = MiMalloc;
+        let layout = Layout::from_size_align(8, 8).unwrap();
+        let alloc = MiMalloc;
 
-            let ptr = alloc.alloc(layout);
-            alloc.dealloc(ptr, layout);
-        }
+        let ptr = unsafe { alloc.alloc(layout) };
+        unsafe { alloc.dealloc(ptr, layout) };
     }
 
     #[test]
     fn it_frees_allocated_big_memory() {
-        unsafe {
-            let layout = Layout::from_size_align(1 << 20, 32).unwrap();
-            let alloc = MiMalloc;
+        let layout = Layout::from_size_align(1 << 20, 32).unwrap();
+        let alloc = MiMalloc;
 
-            let ptr = alloc.alloc(layout);
-            alloc.dealloc(ptr, layout);
-        }
+        let ptr = unsafe { alloc.alloc(layout) };
+        unsafe { alloc.dealloc(ptr, layout) };
     }
 
     #[test]
     fn it_frees_zero_allocated_memory() {
-        unsafe {
-            let layout = Layout::from_size_align(8, 8).unwrap();
-            let alloc = MiMalloc;
+        let layout = Layout::from_size_align(8, 8).unwrap();
+        let alloc = MiMalloc;
 
-            let ptr = alloc.alloc_zeroed(layout);
-            alloc.dealloc(ptr, layout);
-        }
+        let ptr = unsafe { alloc.alloc_zeroed(layout) };
+        unsafe { alloc.dealloc(ptr, layout) };
     }
 
     #[test]
     fn it_frees_zero_allocated_big_memory() {
-        unsafe {
-            let layout = Layout::from_size_align(1 << 20, 32).unwrap();
-            let alloc = MiMalloc;
+        let layout = Layout::from_size_align(1 << 20, 32).unwrap();
+        let alloc = MiMalloc;
 
-            let ptr = alloc.alloc_zeroed(layout);
-            alloc.dealloc(ptr, layout);
-        }
+        let ptr = unsafe { alloc.alloc_zeroed(layout) };
+        unsafe { alloc.dealloc(ptr, layout) };
     }
 
     #[test]
     fn it_frees_reallocated_memory() {
-        unsafe {
-            let layout = Layout::from_size_align(8, 8).unwrap();
-            let alloc = MiMalloc;
+        let layout = Layout::from_size_align(8, 8).unwrap();
+        let alloc = MiMalloc;
 
-            let ptr = alloc.alloc(layout);
-            let ptr = alloc.realloc(ptr, layout, 16);
-            alloc.dealloc(ptr, layout);
-        }
+        let ptr = unsafe { alloc.alloc(layout) };
+        let ptr = unsafe { alloc.realloc(ptr, layout, 16) };
+        unsafe { alloc.dealloc(ptr, layout) };
     }
 
     #[test]
     fn it_frees_reallocated_big_memory() {
-        unsafe {
-            let layout = Layout::from_size_align(1 << 20, 32).unwrap();
-            let alloc = MiMalloc;
+        let layout = Layout::from_size_align(1 << 20, 32).unwrap();
+        let alloc = MiMalloc;
 
-            let ptr = alloc.alloc(layout);
-            let ptr = alloc.realloc(ptr, layout, 2 << 20);
-            alloc.dealloc(ptr, layout);
-        }
+        let ptr = unsafe { alloc.alloc(layout) };
+        let ptr = unsafe { alloc.realloc(ptr, layout, 2 << 20) };
+        unsafe { alloc.dealloc(ptr, layout) };
     }
 }
