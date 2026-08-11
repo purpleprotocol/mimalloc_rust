@@ -3,6 +3,7 @@ name = "libmimalloc-sys"
 version = "0.1.49"
 authors = ["Octavian Oncescu <octavonce@gmail.com>"]
 edition = "2018"
+rust-version = "1.64"
 repository = "https://github.com/purpleprotocol/mimalloc_rust/tree/master/libmimalloc-sys"
 keywords = ["allocator", "encrypted-heap", "performance"]
 categories = ["memory-management", "api-bindings"]
@@ -31,7 +32,7 @@ cty = { version = "0.2", optional = true }
 libc = "0.2"
 
 [build-dependencies]
-cc = "1.2"
+cc = "1.4"
 
 [features]
 secure = []
