@@ -51,6 +51,10 @@ fn main() {
         build.std("c++17");
         build.flag_if_supported("/Zc:__cplusplus");
 
+        if cargo_debug {
+            build.flag("/MDd");
+        }
+
         let wrapper =
             PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set")).join("mimalloc-static.cc");
         let include = static_source.to_string_lossy().replace('\\', "/");
