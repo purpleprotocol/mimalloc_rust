@@ -42,7 +42,7 @@ fn main() {
         || (env::var_os("CARGO_FEATURE_DEBUG_IN_DEBUG").is_some() && cargo_debug);
 
     if target_family != "windows" {
-        build.flag("-Wno-error=date-time");
+        build.flag_if_supported("-Wno-error=date-time");
     }
 
     if target_env == "msvc" {
