@@ -99,7 +99,7 @@ fn main() {
     if (target_os == "linux" || target_os == "android")
         && env::var_os("CARGO_FEATURE_NO_THP").is_some()
     {
-        build.define("MI_NO_THP", "1");
+        build.define("MI_DEFAULT_ALLOW_THP", "0");
     }
 
     if debug_enabled {

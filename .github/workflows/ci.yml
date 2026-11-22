@@ -87,6 +87,14 @@ jobs:
       - name: Test libmimalloc-sys crate bindings (v2, extended)
         run: cargo run --features libmimalloc-sys-test/v2,libmimalloc-sys-test/extended -p libmimalloc-sys-test
 
+      - name: Test libmimalloc-sys (no_thp)
+        if: ${{ contains(matrix.os, 'ubuntu') }}
+        run: cargo test --features libmimalloc-sys/no_thp -p libmimalloc-sys
+
+      - name: Test libmimalloc-sys (v2, no_thp)
+        if: ${{ contains(matrix.os, 'ubuntu') }}
+        run: cargo test --features libmimalloc-sys/v2,libmimalloc-sys/no_thp -p libmimalloc-sys
+
       - name: Test override dylib
         if: ${{ !contains(matrix.os, 'windows') }}
         run: cargo run -ptest-override-with-dylib --features override
