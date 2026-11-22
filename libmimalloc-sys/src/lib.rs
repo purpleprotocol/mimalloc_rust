@@ -136,4 +136,15 @@ mod tests {
         let ptr = unsafe { mi_malloc(42) };
         unsafe { libc::free(ptr) };
     }
+
+    #[cfg(all(feature = "no_thp", target_os = "linux"))]
+    #[test]
+    fn no_thp_disables_transparent_huge_pages() {
+        // mimalloc disables THP when it initializes
+        unsafe { mi_free(mi_malloc(8)) };
+        assert_eq!(
+            unsafe { libc::prctl(libc::PR_GET_THP_DISABLE, 0, 0, 0, 0) },
+            1
+        );
+    }
 }
