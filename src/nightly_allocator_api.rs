@@ -84,11 +84,7 @@ unsafe impl Allocator for MiMalloc {
         old_layout: Layout,
         new_layout: Layout,
     ) -> Result<NonNull<[u8]>, AllocError> {
-        let old_usable_size = match old_layout.size() {
-            0 => 0,
-            // Safety: `ptr` refers to a valid allocation from mimalloc
-            _ => unsafe { mi_usable_size(ptr.as_ptr() as *mut _) },
-        };
+        let old_size = old_layout.size();
 
         // Safety: by the function preconditions, `ptr` came from this allocator
         let result = unsafe { self.grow(ptr, old_layout, new_layout)? };
@@ -96,9 +92,9 @@ unsafe impl Allocator for MiMalloc {
         // Safety: only bytes within the bounds of the new allocation are written
         unsafe {
             write_bytes(
-                result.cast::<u8>().add(old_usable_size).as_ptr(),
+                result.cast::<u8>().add(old_size).as_ptr(),
                 0,
-                result.len() - old_usable_size,
+                result.len() - old_size,
             );
         }
 
